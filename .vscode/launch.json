@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Web (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome"
+    },
+    {
+      "name": "Web (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "edge"
+    },
+    {
+      "name": "Web (Server)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "web-server"
+    },
+    {
+      "name": "Android Mobile",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "iOS Mobile",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}
