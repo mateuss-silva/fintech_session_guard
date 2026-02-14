@@ -5,10 +5,22 @@ import 'package:fintech_session_guard/features/home/data/datasources/portfolio_r
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
 import 'package:fintech_session_guard/features/home/domain/repositories/portfolio_repository.dart';
 
+import 'package:fintech_session_guard/features/home/data/datasources/asset_price_service.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/asset_price_update.dart';
+
 class PortfolioRepositoryImpl implements PortfolioRepository {
   final PortfolioRemoteDataSource remoteDataSource;
+  final AssetPriceService priceService;
 
-  PortfolioRepositoryImpl({required this.remoteDataSource});
+  PortfolioRepositoryImpl({
+    required this.remoteDataSource,
+    required this.priceService,
+  });
+
+  @override
+  Stream<AssetPriceUpdate> getAssetPriceStream(String ticker) {
+    return priceService.getPriceStream(ticker);
+  }
 
   @override
   Future<Either<Failure, PortfolioSummaryEntity>> getPortfolioSummary() async {

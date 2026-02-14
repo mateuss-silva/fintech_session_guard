@@ -18,14 +18,14 @@ class PortfolioSummaryCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
+        gradient: AppColors.portfolioGradient,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.cardBorder.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.15),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 30,
-            offset: const Offset(0, 15),
+            offset: const Offset(0, 10),
             spreadRadius: -5,
           ),
         ],

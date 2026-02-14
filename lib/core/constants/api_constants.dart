@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// API endpoint constants for the Fintech Session Guard backend.
 ///
 /// All endpoints are relative to [baseUrl].
@@ -7,8 +9,14 @@ class ApiConstants {
   ApiConstants._();
 
   /// Base URL for the backend API.
-  /// In production, this would use HTTPS with certificate pinning.
-  static const String baseUrl = 'http://localhost:3000/api';
+  /// Uses 10.0.2.2 for Android Emulator, localhost for others.
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:3000/api';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:3000/api';
+    }
+    return 'http://localhost:3000/api';
+  }
 
   // ─── Auth ──────────────────────────────────────────────────────
   static const String login = '/auth/login';
