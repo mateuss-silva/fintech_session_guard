@@ -53,47 +53,50 @@ class _LoginPageState extends State<LoginPage> {
             },
             builder: (context, state) {
               return Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const BrandedLogo(size: 80),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Session Guard',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Secure Fintech Solutions',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      _buildLoginForm(context, state),
-                      const SizedBox(height: 24),
-                      TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const RegisterPage(),
-                          ),
-                        ),
-                        child: Text(
-                          "Don't have an account? Create one",
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const BrandedLogo(size: 80),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Session Guard',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Secure Fintech Solutions',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+                        _buildLoginForm(context, state),
+                        const SizedBox(height: 24),
+                        TextButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const RegisterPage(),
+                            ),
+                          ),
+                          child: Text(
+                            "Don't have an account? Create one",
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

@@ -1,26 +1,36 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:fintech_session_guard/core/network/api_client.dart';
 import 'package:fintech_session_guard/features/home/data/datasources/asset_price_service.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/asset_price_update.dart';
 import 'package:rxdart/rxdart.dart';
 
-class RxAssetPriceService implements AssetPriceService {
+AssetPriceService getRxAssetPriceService(ApiClient client) =>
+    RxAssetPriceServiceMobile(client);
+
+class RxAssetPriceServiceMobile implements AssetPriceService {
   final ApiClient _client;
 
-  RxAssetPriceService(this._client);
+  RxAssetPriceServiceMobile(this._client);
 
   @override
   Stream<AssetPriceUpdate> getPriceStream(String ticker) {
     // Retry logic with Rx
-    return Rx.retry(() => _getStream(ticker)).asBroadcastStream();
+    return Rx.retry(
+      () => _getStream(ticker),
+    ).asBroadcastStream(onCancel: (subscription) => subscription.cancel());
   }
 
   Stream<AssetPriceUpdate> _getStream(String ticker) async* {
     try {
       final response = await _client.dio.get<ResponseBody>(
         '/market/instruments/$ticker/stream',
-        options: Options(responseType: ResponseType.stream),
+        options: Options(
+          responseType: ResponseType.stream,
+          receiveTimeout: const Duration(days: 1), // Practically infinite
+          headers: {'Connection': 'keep-alive'},
+        ),
       );
 
       final stream = response.data?.stream;
@@ -51,8 +61,9 @@ class RxAssetPriceService implements AssetPriceService {
           .where((event) => event != null)
           .cast<AssetPriceUpdate>();
     } catch (e) {
+      debugPrint('[DEBUG] Stream error for $ticker: $e');
       // Re-throw to trigger retry
-      throw e;
+      rethrow;
     }
   }
 }

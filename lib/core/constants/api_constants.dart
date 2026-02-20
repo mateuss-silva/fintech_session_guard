@@ -11,11 +11,12 @@ class ApiConstants {
   /// Base URL for the backend API.
   /// Uses 10.0.2.2 for Android Emulator, localhost for others.
   static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:3000/api';
+    if (kIsWeb) return 'https://localhost:3000/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:3000/api';
+      return 'https://10.0.2.2:3000/api';
     }
-    return 'http://localhost:3000/api';
+    // Windows Desktop often fails to resolve localhost correctly in Flutter, use IPv4 loopback
+    return 'https://127.0.0.1:3000/api';
   }
 
   // ─── Auth ──────────────────────────────────────────────────────

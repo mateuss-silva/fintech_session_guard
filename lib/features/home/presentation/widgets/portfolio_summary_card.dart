@@ -20,10 +20,10 @@ class PortfolioSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: AppColors.portfolioGradient,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 30,
             offset: const Offset(0, 10),
             spreadRadius: -5,
@@ -107,7 +107,7 @@ class PortfolioSummaryCard extends StatelessWidget {
               : EdgeInsets.zero,
           decoration: isProfit && valueColor != AppColors.textPrimary
               ? BoxDecoration(
-                  color: valueColor.withOpacity(0.1),
+                  color: valueColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 )
               : null,

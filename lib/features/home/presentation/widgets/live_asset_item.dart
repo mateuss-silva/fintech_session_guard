@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fintech_session_guard/core/di/injection.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/asset_entity.dart';
-import 'package:fintech_session_guard/features/home/domain/entities/asset_price_update.dart';
 import 'package:fintech_session_guard/features/home/domain/repositories/portfolio_repository.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class LiveAssetItem extends StatefulWidget {
   final AssetEntity asset;
@@ -16,21 +17,21 @@ class LiveAssetItem extends StatefulWidget {
 }
 
 class _LiveAssetItemState extends State<LiveAssetItem>
-    with SingleTickerProviderStateMixin {
-  late Stream<AssetPriceUpdate> _priceStream;
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  StreamSubscription? _subscription;
   late double _currentPrice;
   late double _currentVariation;
   AnimationController? _controller;
   Color? _flashColor;
+  Timer? _debounceTimer;
+  final Key _visibilityKey = UniqueKey();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _currentPrice = widget.asset.currentValue;
     _currentVariation = widget.asset.variationPct;
-    _priceStream = sl<PortfolioRepository>().getAssetPriceStream(
-      widget.asset.ticker,
-    );
 
     _controller = AnimationController(
       vsync: this,
@@ -48,16 +49,54 @@ class _LiveAssetItemState extends State<LiveAssetItem>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _debounceTimer?.cancel();
+    _disconnectStream();
     _controller?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    VisibilityDetectorController.instance.notifyNow();
+  }
+
+  void _connectStream() {
+    if (_subscription != null) return;
+
+    final stream = sl<PortfolioRepository>().getAssetPriceStream(
+      widget.asset.ticker,
+    );
+
+    _subscription = stream.listen((update) {
+      if (!mounted) return;
+
+      final oldPrice = _currentPrice;
+      if (update.price != oldPrice) {
+        setState(() {
+          _currentPrice = update.price;
+          _currentVariation = update.variationPct;
+
+          if (oldPrice != _currentPrice) {
+            _flash(_currentPrice > oldPrice);
+          }
+        });
+      }
+    });
+  }
+
+  void _disconnectStream() {
+    _subscription?.cancel();
+    _subscription = null;
   }
 
   void _flash(bool isPositive) {
     if (!mounted) return;
     setState(() {
       _flashColor = isPositive
-          ? AppColors.profit.withOpacity(0.3)
-          : AppColors.loss.withOpacity(0.3);
+          ? AppColors.profit.withValues(alpha: 0.3)
+          : AppColors.loss.withValues(alpha: 0.3);
     });
     _controller?.forward();
   }
@@ -66,129 +105,113 @@ class _LiveAssetItemState extends State<LiveAssetItem>
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.simpleCurrency(locale: 'en_US');
     final percentFormat = NumberFormat.decimalPercentPattern(decimalDigits: 2);
+    final isPositive = _currentVariation >= 0;
 
-    return StreamBuilder<AssetPriceUpdate>(
-      stream: _priceStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final oldPrice = _currentPrice;
-          _currentPrice = snapshot.data!.price;
-          _currentVariation = snapshot.data!.variationPct;
-
-          if (_currentPrice != oldPrice) {
-            // Trigger flash effect on next frame if we could, but here we just set state
-            // actually we should trigger flash in the builder but we need to be careful about build cycles.
-            // A better way is to listen to the stream in initState and setState, but StreamBuilder handles disposal better.
-            // For simplicity in this demo, we'll just flash based on comparison if we were using a listener.
-            // Since we are in build, we can't call setState.
-            // So we'll accept the limitation of no flash for now, or use a custom hook.
-            // Let's stick to just updating the values for now.
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (oldPrice != _currentPrice) {
-                _flash(_currentPrice > oldPrice);
-              }
-            });
-          }
+    return VisibilityDetector(
+      key: _visibilityKey,
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0) {
+          // Debounce connection to prevent scroll-by triggers
+          _debounceTimer?.cancel();
+          _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+            if (mounted) _connectStream();
+          });
+        } else {
+          _debounceTimer?.cancel();
+          _disconnectStream();
         }
-
-        final isPositive = _currentVariation >= 0;
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            color: _flashColor ?? AppColors.cardColor.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      widget.asset.ticker.substring(0, 1),
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: _flashColor ?? AppColors.cardColor.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    widget.asset.ticker.substring(0, 1),
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.asset.ticker,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                      ),
-                      Text(
-                        widget.asset.name,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      currencyFormat.format(_currentPrice),
+                      widget.asset.ticker,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          isPositive
-                              ? Icons.arrow_drop_up_rounded
-                              : Icons.arrow_drop_down_rounded,
-                          color: isPositive ? AppColors.profit : AppColors.loss,
-                          size: 20,
-                        ),
-                        Text(
-                          percentFormat.format(_currentVariation / 100),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: isPositive
-                                    ? AppColors.profit
-                                    : AppColors.loss,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                      ],
+                    Text(
+                      widget.asset.name,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    currencyFormat.format(_currentPrice),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        isPositive
+                            ? Icons.arrow_drop_up_rounded
+                            : Icons.arrow_drop_down_rounded,
+                        color: isPositive ? AppColors.profit : AppColors.loss,
+                        size: 20,
+                      ),
+                      Text(
+                        percentFormat.format(_currentVariation / 100),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isPositive ? AppColors.profit : AppColors.loss,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

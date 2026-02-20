@@ -16,7 +16,6 @@ class AppConstants {
 
   /// Sensitive operations that require biometric verification.
   static const List<String> biometricOperations = [
-    'redeem',
     'transfer',
     'settings',
     'password_change',

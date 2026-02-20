@@ -12,7 +12,7 @@ import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../features/home/data/datasources/asset_price_service.dart';
-import '../../features/home/data/datasources/rx_asset_price_service.dart';
+import '../../features/home/data/datasources/rx_asset_price_service_factory.dart';
 import '../../features/home/data/datasources/portfolio_remote_data_source.dart';
 import '../../features/home/data/repositories/portfolio_repository_impl.dart';
 import '../../features/home/domain/repositories/portfolio_repository.dart';
@@ -75,7 +75,7 @@ Future<void> initDependencies() async {
   );
 
   sl.registerLazySingleton<AssetPriceService>(
-    () => RxAssetPriceService(sl<ApiClient>()),
+    () => RxAssetPriceServiceFactory.create(sl<ApiClient>()),
   );
 
   // Repository
