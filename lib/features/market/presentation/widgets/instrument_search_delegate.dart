@@ -119,7 +119,7 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'R\$ ${instrument.currentPrice.toStringAsFixed(2)}',
+                        '\$ ${instrument.currentPrice.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -221,7 +221,7 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
                     style: const TextStyle(color: AppColors.textSecondary),
                   ), // Show sector in suggestion
                   trailing: Text(
-                    'R\$ ${instrument.currentPrice.toStringAsFixed(2)}',
+                    '\$ ${instrument.currentPrice.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,

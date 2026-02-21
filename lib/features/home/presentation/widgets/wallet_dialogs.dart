@@ -70,7 +70,7 @@ class WalletDialogs {
                     fontSize: 24,
                   ),
                   decoration: const InputDecoration(
-                    prefixText: 'R\$ ',
+                    prefixText: '\$ ',
                     prefixStyle: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 24,
@@ -163,7 +163,7 @@ class WalletDialogs {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'To withdraw R\$ ${originalAmount.toStringAsFixed(2)}, we need to automatically sell the following assets to cover the shortfall:',
+                'To withdraw \$ ${originalAmount.toStringAsFixed(2)}, we need to automatically sell the following assets to cover the shortfall:',
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 16),
@@ -182,11 +182,11 @@ class WalletDialogs {
                           ),
                         ),
                         subtitle: Text(
-                          '${asset.quantitySold.toStringAsFixed(4)} shares @ R\$ ${asset.priceAtExecution.toStringAsFixed(2)}',
+                          '${asset.quantitySold.toStringAsFixed(4)} • \$ ${asset.priceAtExecution.toStringAsFixed(2)}',
                           style: const TextStyle(color: AppColors.textTertiary),
                         ),
                         trailing: Text(
-                          'R\$ ${asset.valueGenerated.toStringAsFixed(2)}',
+                          '\$ ${asset.valueGenerated.toStringAsFixed(2)}',
                           style: const TextStyle(
                             color: AppColors.loss,
                             fontWeight: FontWeight.bold,
