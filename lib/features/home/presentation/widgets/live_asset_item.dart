@@ -23,7 +23,7 @@ class LiveAssetItem extends StatefulWidget {
 class _LiveAssetItemState extends State<LiveAssetItem>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   StreamSubscription? _subscription;
-  late double _currentPrice;
+  late double _currentUnitPrice;
   late double _currentVariation;
   AnimationController? _controller;
   Color? _flashColor;
@@ -34,7 +34,7 @@ class _LiveAssetItemState extends State<LiveAssetItem>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _currentPrice = widget.asset.currentValue;
+    _currentUnitPrice = widget.asset.currentPrice;
     _currentVariation = widget.asset.variationPct;
 
     _controller = AnimationController(
@@ -76,14 +76,14 @@ class _LiveAssetItemState extends State<LiveAssetItem>
     _subscription = stream.listen((update) {
       if (!mounted) return;
 
-      final oldPrice = _currentPrice;
+      final oldPrice = _currentUnitPrice;
       if (update.price != oldPrice) {
         setState(() {
-          _currentPrice = update.price;
+          _currentUnitPrice = update.price;
           _currentVariation = update.variationPct;
 
-          if (oldPrice != _currentPrice) {
-            _flash(_currentPrice > oldPrice);
+          if (oldPrice != _currentUnitPrice) {
+            _flash(_currentUnitPrice > oldPrice);
           }
         });
       }
@@ -179,6 +179,13 @@ class _LiveAssetItemState extends State<LiveAssetItem>
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    Text(
+                      '${widget.asset.quantity} • ${currencyFormat.format(_currentUnitPrice)}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -186,7 +193,9 @@ class _LiveAssetItemState extends State<LiveAssetItem>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    currencyFormat.format(_currentPrice),
+                    currencyFormat.format(
+                      widget.asset.quantity * _currentUnitPrice,
+                    ),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
