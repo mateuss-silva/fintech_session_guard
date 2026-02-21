@@ -26,16 +26,13 @@ class HomePage extends StatelessWidget {
         builder: (context) {
           return ResponsiveScaffold(
             title: 'My Portfolio',
+            onSearchTapped: () {
+              showSearch(
+                context: context,
+                delegate: InstrumentSearchDelegate(),
+              );
+            },
             actions: [
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  showSearch(
-                    context: context,
-                    delegate: InstrumentSearchDelegate(),
-                  );
-                },
-              ),
               IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () {
@@ -58,9 +55,21 @@ class HomePage extends StatelessWidget {
                 child: BlocListener<PortfolioBloc, PortfolioState>(
                   listenWhen: (previous, current) =>
                       current is WalletTransactionSuccess ||
-                      current is WalletTransactionFailure,
+                      current is WalletTransactionFailure ||
+                      current is WalletLiquidationRequired,
                   listener: (context, state) {
-                    if (state is WalletTransactionSuccess) {
+                    if (state is WalletLiquidationRequired) {
+                      WalletDialogs.showLiquidationConfirmationDialog(
+                        context,
+                        originalAmount: state.amount,
+                        assetsToSell: state.assetsToSell,
+                        onConfirm: () {
+                          context.read<PortfolioBloc>().add(
+                            WalletWithdrawConfirmed(state.amount),
+                          );
+                        },
+                      );
+                    } else if (state is WalletTransactionSuccess) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -175,57 +184,85 @@ class HomePage extends StatelessWidget {
                                             ],
                                           ),
                                           const SizedBox(height: 16),
-                                          SizedBox(
-                                            height:
-                                                480, // Constrain height for the TabBarView
-                                            child: TabBarView(
-                                              children: [
-                                                // Portfolio Tab
-                                                state.portfolio.assets.isEmpty
-                                                    ? const Center(
-                                                        child: Text(
-                                                          'You have no assets yet.',
-                                                          style: TextStyle(
-                                                            color: AppColors
-                                                                .textSecondary,
-                                                          ),
-                                                        ),
-                                                      )
-                                                    : AssetList(
-                                                        assets: state
-                                                            .portfolio
-                                                            .assets,
-                                                        watchlist:
-                                                            state.watchlist,
-                                                      ),
-                                                // Watchlist Tab
-                                                state.watchlist.isEmpty
-                                                    ? const Center(
-                                                        child: Text(
-                                                          'Your watchlist is empty.',
-                                                          style: TextStyle(
-                                                            color: AppColors
-                                                                .textSecondary,
-                                                          ),
-                                                        ),
-                                                      )
-                                                    : AssetList(
-                                                        assets: state
+                                          Builder(
+                                            builder: (context) {
+                                              final tabController =
+                                                  DefaultTabController.of(
+                                                    context,
+                                                  );
+                                              return AnimatedBuilder(
+                                                animation: tabController,
+                                                builder: (context, _) {
+                                                  // Portfolio Tab
+                                                  if (tabController.index ==
+                                                      0) {
+                                                    return state
                                                             .portfolio
                                                             .assets
-                                                            .where(
-                                                              (a) => state
-                                                                  .watchlist
-                                                                  .contains(
-                                                                    a.ticker,
-                                                                  ),
-                                                            )
-                                                            .toList(),
-                                                        watchlist:
-                                                            state.watchlist,
-                                                      ),
-                                              ],
-                                            ),
+                                                            .isEmpty
+                                                        ? const Padding(
+                                                            padding:
+                                                                EdgeInsets.symmetric(
+                                                                  vertical:
+                                                                      32.0,
+                                                                ),
+                                                            child: Center(
+                                                              child: Text(
+                                                                'You have no assets yet.',
+                                                                style: TextStyle(
+                                                                  color: AppColors
+                                                                      .textSecondary,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : AssetList(
+                                                            assets: state
+                                                                .portfolio
+                                                                .assets,
+                                                            watchlist:
+                                                                state.watchlist,
+                                                          );
+                                                  }
+                                                  // Watchlist Tab
+                                                  else {
+                                                    final watchedAssets = state
+                                                        .portfolio
+                                                        .assets
+                                                        .where(
+                                                          (a) => state.watchlist
+                                                              .contains(
+                                                                a.ticker,
+                                                              ),
+                                                        )
+                                                        .toList();
+                                                    return watchedAssets.isEmpty
+                                                        ? const Padding(
+                                                            padding:
+                                                                EdgeInsets.symmetric(
+                                                                  vertical:
+                                                                      32.0,
+                                                                ),
+                                                            child: Center(
+                                                              child: Text(
+                                                                'Your watchlist is empty.',
+                                                                style: TextStyle(
+                                                                  color: AppColors
+                                                                      .textSecondary,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : AssetList(
+                                                            assets:
+                                                                watchedAssets,
+                                                            watchlist:
+                                                                state.watchlist,
+                                                          );
+                                                  }
+                                                },
+                                              );
+                                            },
                                           ),
                                         ],
                                       ),

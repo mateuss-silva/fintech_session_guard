@@ -13,6 +13,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   final GetPortfolioSummaryUseCase _getPortfolioSummaryUseCase;
   final DepositUseCase _depositUseCase;
   final WithdrawUseCase _withdrawUseCase;
+  final PreviewWithdrawUseCase _previewWithdrawUseCase;
   final GetWatchlistUseCase _getWatchlistUseCase;
   final AddTickerUseCase _addTickerUseCase;
   final RemoveTickerUseCase _removeTickerUseCase;
@@ -24,6 +25,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     required GetPortfolioSummaryUseCase getPortfolioSummaryUseCase,
     required DepositUseCase depositUseCase,
     required WithdrawUseCase withdrawUseCase,
+    required PreviewWithdrawUseCase previewWithdrawUseCase,
     required GetWatchlistUseCase getWatchlistUseCase,
     required AddTickerUseCase addTickerUseCase,
     required RemoveTickerUseCase removeTickerUseCase,
@@ -31,6 +33,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   }) : _getPortfolioSummaryUseCase = getPortfolioSummaryUseCase,
        _depositUseCase = depositUseCase,
        _withdrawUseCase = withdrawUseCase,
+       _previewWithdrawUseCase = previewWithdrawUseCase,
        _getWatchlistUseCase = getWatchlistUseCase,
        _addTickerUseCase = addTickerUseCase,
        _removeTickerUseCase = removeTickerUseCase,
@@ -40,6 +43,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     on<PortfolioRefreshed>(_onRefreshed);
     on<WalletDepositRequested>(_onDepositRequested);
     on<WalletWithdrawRequested>(_onWithdrawRequested);
+    on<WalletWithdrawConfirmed>(_onWithdrawConfirmed);
     on<WatchlistAdded>(_onWatchlistAdded);
     on<WatchlistRemoved>(_onWatchlistRemoved);
   }
@@ -117,15 +121,41 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     Emitter<PortfolioState> emit,
   ) async {
     emit(const WalletTransactionInProgress());
-    final result = await _withdrawUseCase(event.amount);
 
-    result.fold(
+    final previewResult = await _previewWithdrawUseCase(event.amount);
+
+    await previewResult.fold(
+      (failure) async {
+        emit(WalletTransactionFailure(_mapFailureToMessage(failure)));
+      },
+      (preview) async {
+        if (preview.requiresLiquidation) {
+          emit(WalletLiquidationRequired(event.amount, preview.assetsToSell));
+        } else {
+          // Perform withdraw directly if no liquidation needed
+          final withdrawResult = await _withdrawUseCase(event.amount);
+          withdrawResult.fold(
+            (failure) =>
+                emit(WalletTransactionFailure(_mapFailureToMessage(failure))),
+            (_) =>
+                emit(const WalletTransactionSuccess('Withdrawal successful')),
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> _onWithdrawConfirmed(
+    WalletWithdrawConfirmed event,
+    Emitter<PortfolioState> emit,
+  ) async {
+    emit(const WalletTransactionInProgress());
+    final withdrawResult = await _withdrawUseCase(event.amount);
+
+    withdrawResult.fold(
       (failure) =>
           emit(WalletTransactionFailure(_mapFailureToMessage(failure))),
-      (_) {
-        emit(const WalletTransactionSuccess('Withdrawal successful'));
-        // Stream automatically updates the balance, no need to manually fetch.
-      },
+      (_) => emit(const WalletTransactionSuccess('Withdrawal successful')),
     );
   }
 

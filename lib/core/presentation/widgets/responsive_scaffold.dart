@@ -5,12 +5,14 @@ class ResponsiveScaffold extends StatefulWidget {
   final Widget body;
   final String title;
   final List<Widget>? actions;
+  final VoidCallback? onSearchTapped;
 
   const ResponsiveScaffold({
     super.key,
     required this.body,
     required this.title,
     this.actions,
+    this.onSearchTapped,
   });
 
   @override
@@ -33,6 +35,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
               backgroundColor: AppColors.cardColor,
               selectedIndex: _selectedIndex,
               onDestinationSelected: (int index) {
+                if (index == 1) {
+                  widget.onSearchTapped?.call();
+                  return;
+                }
                 setState(() {
                   _selectedIndex = index;
                 });
@@ -53,9 +59,9 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                   label: Text('Home'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.pie_chart_outline),
-                  selectedIcon: Icon(Icons.pie_chart),
-                  label: Text('Portfolio'),
+                  icon: Icon(Icons.search),
+                  selectedIcon: Icon(Icons.search),
+                  label: Text('Search'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.settings_outlined),
@@ -104,6 +110,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
         backgroundColor: AppColors.cardColor,
         currentIndex: _selectedIndex,
         onTap: (int index) {
+          if (index == 1) {
+            widget.onSearchTapped?.call();
+            return;
+          }
           setState(() {
             _selectedIndex = index;
           });
@@ -118,9 +128,9 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart_outline),
-            activeIcon: Icon(Icons.pie_chart),
-            label: 'Portfolio',
+            icon: Icon(Icons.search),
+            activeIcon: Icon(Icons.search),
+            label: 'Search',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

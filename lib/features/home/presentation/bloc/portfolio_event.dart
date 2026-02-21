@@ -31,6 +31,14 @@ class WalletWithdrawRequested extends PortfolioEvent {
   List<Object> get props => [amount];
 }
 
+class WalletWithdrawConfirmed extends PortfolioEvent {
+  final double amount;
+  const WalletWithdrawConfirmed(this.amount);
+
+  @override
+  List<Object> get props => [amount];
+}
+
 class WatchlistRequested extends PortfolioEvent {
   const WatchlistRequested();
 }

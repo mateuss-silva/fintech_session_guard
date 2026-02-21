@@ -3,11 +3,13 @@ import 'package:fintech_session_guard/core/constants/api_constants.dart';
 import 'package:fintech_session_guard/core/error/exceptions.dart';
 import 'package:fintech_session_guard/core/network/api_client.dart';
 import 'package:fintech_session_guard/features/home/data/models/portfolio_summary_model.dart';
+import 'package:fintech_session_guard/features/home/data/models/withdraw_preview_model.dart';
 
 abstract class PortfolioRemoteDataSource {
   Future<PortfolioSummaryModel> getPortfolioSummary();
   Future<void> depositMoney(double amount);
   Future<void> withdrawMoney(double amount);
+  Future<WithdrawPreviewModel> previewWithdraw(double amount);
 }
 
 class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
@@ -70,6 +72,30 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
       if (response.statusCode != 200) {
         throw const ServerException(message: 'Failed to withdraw money');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        throw ServerException(
+          message: e.response?.data['message'] ?? 'Insufficient funds',
+        );
+      }
+      throw ServerException(message: e.message ?? 'Server error');
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<WithdrawPreviewModel> previewWithdraw(double amount) async {
+    try {
+      final response = await _client.dio.post(
+        ApiConstants.previewWithdraw,
+        data: {'amount': amount},
+      );
+      if (response.statusCode == 200) {
+        return WithdrawPreviewModel.fromJson(response.data);
+      } else {
+        throw const ServerException(message: 'Failed to preview withdrawal');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {

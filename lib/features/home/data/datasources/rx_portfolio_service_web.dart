@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:web/web.dart' as web;
 
@@ -33,41 +34,88 @@ class RxPortfolioServiceWeb implements PortfolioStreamService {
 
     final token = await _secureStorage.getAccessToken();
     final baseUrl = _client.dio.options.baseUrl;
-    final url = '$baseUrl/portfolio/stream?token=$token';
+    final url = '$baseUrl/portfolio/stream';
 
-    final eventSource = web.EventSource(url);
+    final headers =
+        {
+              'Content-Type': 'application/json',
+              'Accept': 'text/event-stream',
+            }.jsify()
+            as web.HeadersInit;
 
-    eventSource.onmessage = ((web.Event event) {
-      final messageEvent = event as web.MessageEvent;
-      try {
-        if (messageEvent.data != null) {
-          final String dataString = (messageEvent.data as JSAny)
-              .dartify()
-              .toString();
-          if (dataString.trim().isEmpty) return;
+    final body = jsonEncode({'token': token}).toJS;
 
-          final json = jsonDecode(dataString);
-          final update = PortfolioSummaryModel.fromJson(
-            json as Map<String, dynamic>,
-          );
-          controller.add(update);
+    final requestOptions = web.RequestInit(
+      method: 'POST',
+      headers: headers,
+      body: body,
+    );
+
+    try {
+      final response = await web.window.fetch(url.toJS, requestOptions).toDart;
+      final reader = response.body!.getReader();
+      bool active = true;
+
+      controller.onCancel = () {
+        active = false;
+        reader.callMethod('cancel'.toJS);
+      };
+
+      String buffer = '';
+
+      Future<void> read() async {
+        try {
+          while (active && !controller.isClosed) {
+            final promise = reader.callMethod('read'.toJS) as JSPromise<JSAny?>;
+            final resultAny = await promise.toDart;
+            final jsObj = resultAny as JSObject;
+
+            final doneNode = jsObj['done'];
+            final done = doneNode != null
+                ? (doneNode as JSBoolean).toDart
+                : false;
+
+            if (done) {
+              controller.close();
+              active = false;
+              break;
+            }
+
+            final valueNode = jsObj['value'];
+            if (valueNode != null) {
+              final chunkData = (valueNode as JSUint8Array).toDart;
+              final chunkStr = utf8.decode(chunkData);
+              buffer += chunkStr;
+
+              while (buffer.contains('\n\n')) {
+                final endIndex = buffer.indexOf('\n\n');
+                final message = buffer.substring(0, endIndex);
+                buffer = buffer.substring(endIndex + 2);
+
+                if (message.startsWith('data:')) {
+                  final data = message.substring(5).trim();
+                  if (data.isNotEmpty) {
+                    try {
+                      final parsed = jsonDecode(data);
+                      final model = PortfolioSummaryModel.fromJson(parsed);
+                      if (!controller.isClosed) controller.add(model);
+                    } catch (_) {}
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          if (!controller.isClosed) controller.addError(e);
         }
-      } catch (e) {
-        controller.addError(e);
       }
-    }).toJS;
 
-    eventSource.onerror = ((web.Event event) {
+      read();
+    } catch (e) {
       if (!controller.isClosed) {
-        controller.addError(
-          Exception('EventSource error for Portfolio Stream'),
-        );
+        controller.addError(Exception('Fetch error for Portfolio Stream'));
       }
-    }).toJS;
-
-    controller.onCancel = () {
-      eventSource.close();
-    };
+    }
 
     yield* controller.stream;
   }

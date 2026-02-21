@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/withdraw_preview_entity.dart';
 
 abstract class PortfolioState extends Equatable {
   const PortfolioState();
@@ -33,6 +34,16 @@ class PortfolioError extends PortfolioState {
 
   @override
   List<Object> get props => [message];
+}
+
+class WalletLiquidationRequired extends PortfolioState {
+  final double amount;
+  final List<AssetSoldPreviewEntity> assetsToSell;
+
+  const WalletLiquidationRequired(this.amount, this.assetsToSell);
+
+  @override
+  List<Object> get props => [amount, assetsToSell];
 }
 
 class WalletTransactionInProgress extends PortfolioState {
