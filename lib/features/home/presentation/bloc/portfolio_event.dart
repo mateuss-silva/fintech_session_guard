@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:dartz/dartz.dart';
+import 'package:fintech_session_guard/core/error/failures.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
 
 abstract class PortfolioEvent extends Equatable {
   const PortfolioEvent();
@@ -57,4 +60,12 @@ class WatchlistRemoved extends PortfolioEvent {
 
   @override
   List<Object> get props => [ticker];
+}
+
+class PortfolioStreamUpdated extends PortfolioEvent {
+  final Either<Failure, PortfolioSummaryEntity> result;
+  const PortfolioStreamUpdated(this.result);
+
+  @override
+  List<Object> get props => [result];
 }

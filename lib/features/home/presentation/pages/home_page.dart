@@ -95,7 +95,8 @@ class HomePage extends StatelessWidget {
                     buildWhen: (previous, current) =>
                         current is! WalletTransactionInProgress &&
                         current is! WalletTransactionSuccess &&
-                        current is! WalletTransactionFailure,
+                        current is! WalletTransactionFailure &&
+                        current is! WalletLiquidationRequired,
                     builder: (context, state) {
                       if (state is PortfolioLoading) {
                         return const Center(child: CircularProgressIndicator());

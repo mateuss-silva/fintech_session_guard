@@ -10,10 +10,10 @@ class AssetSoldPreviewModel extends AssetSoldPreviewEntity {
 
   factory AssetSoldPreviewModel.fromJson(Map<String, dynamic> json) {
     return AssetSoldPreviewModel(
-      ticker: json['ticker'],
-      quantitySold: (json['quantity_sold'] as num).toDouble(),
-      valueGenerated: (json['value_generated'] as num).toDouble(),
-      priceAtExecution: (json['price_at_execution'] as num).toDouble(),
+      ticker: json['ticker'] ?? '',
+      quantitySold: (json['quantity_sold'] as num?)?.toDouble() ?? 0.0,
+      valueGenerated: (json['value_generated'] as num?)?.toDouble() ?? 0.0,
+      priceAtExecution: (json['price_at_execution'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -34,12 +34,10 @@ class WithdrawPreviewModel extends WithdrawPreviewEntity {
         .toList();
 
     return WithdrawPreviewModel(
-      requiresLiquidation: json['requires_liquidation'],
-      amountRequested: (json['amount_requested'] as num).toDouble(),
-      brlAvailable: (json['brl_available'] as num).toDouble(),
-      shortfall: json['shortfall'] != null
-          ? (json['shortfall'] as num).toDouble()
-          : null,
+      requiresLiquidation: json['requires_liquidation'] ?? false,
+      amountRequested: (json['amount_requested'] as num?)?.toDouble() ?? 0.0,
+      brlAvailable: (json['brl_available'] as num?)?.toDouble() ?? 0.0,
+      shortfall: (json['shortfall'] as num?)?.toDouble(),
       assetsToSell: assetsList,
     );
   }

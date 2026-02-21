@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fintech_session_guard/core/error/failures.dart';
 import 'package:fintech_session_guard/features/home/domain/usecases/get_portfolio_summary_usecase.dart';
@@ -20,6 +21,8 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
 
   final StreamPortfolioUseCase _streamPortfolioUseCase;
   List<String> _currentWatchlist = [];
+  StreamSubscription<Either<Failure, PortfolioSummaryEntity>>?
+  _portfolioSubscription;
 
   PortfolioBloc({
     required GetPortfolioSummaryUseCase getPortfolioSummaryUseCase,
@@ -40,6 +43,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
        _streamPortfolioUseCase = streamPortfolioUseCase,
        super(const PortfolioInitial()) {
     on<PortfolioSummaryRequested>(_onSummaryRequested);
+    on<PortfolioStreamUpdated>(_onStreamUpdated);
     on<PortfolioRefreshed>(_onRefreshed);
     on<WalletDepositRequested>(_onDepositRequested);
     on<WalletWithdrawRequested>(_onWithdrawRequested);
@@ -61,17 +65,30 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       (list) => _currentWatchlist = list,
     );
 
-    await emit.forEach<Either<Failure, PortfolioSummaryEntity>>(
-      _streamPortfolioUseCase(),
-      onData: (result) {
-        return result.fold(
-          (failure) => PortfolioError(_mapFailureToMessage(failure)),
-          (portfolio) =>
-              PortfolioLoaded(portfolio, watchlist: _currentWatchlist),
-        );
-      },
-      onError: (error, stackTrace) => PortfolioError(error.toString()),
+    await _portfolioSubscription?.cancel();
+    _portfolioSubscription = _streamPortfolioUseCase().listen(
+      (result) => add(PortfolioStreamUpdated(result)),
+      onError: (error) => add(
+        PortfolioStreamUpdated(Left(ServerFailure(message: error.toString()))),
+      ),
     );
+  }
+
+  void _onStreamUpdated(
+    PortfolioStreamUpdated event,
+    Emitter<PortfolioState> emit,
+  ) {
+    event.result.fold(
+      (failure) => emit(PortfolioError(_mapFailureToMessage(failure))),
+      (portfolio) =>
+          emit(PortfolioLoaded(portfolio, watchlist: _currentWatchlist)),
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _portfolioSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onRefreshed(

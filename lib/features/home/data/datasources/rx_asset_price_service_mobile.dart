@@ -51,8 +51,9 @@ class RxAssetPriceServiceMobile implements AssetPriceService {
               final json = jsonDecode(jsonLine);
               return AssetPriceUpdate(
                 ticker: json['ticker'] ?? ticker,
-                price: (json['currentPrice'] as num).toDouble(),
-                variationPct: (json['changePercent'] as num).toDouble(),
+                price: (json['currentPrice'] as num?)?.toDouble() ?? 0.0,
+                variationPct:
+                    (json['changePercent'] as num?)?.toDouble() ?? 0.0,
               );
             } catch (_) {
               return null;
