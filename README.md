@@ -26,6 +26,8 @@ Security doesn't have to be ugly.
 
 - **Adaptive Interface**: Whether you're on your phone or your laptop, the app adjusts its layout to fit your screen perfectly (Navigation Rail on Desktop vs. Bottom Bar on Mobile).
 - **Real-Time Portfolio**: Track your assets, view profit/loss in real-time, and manage your investments with a beautiful, dark-themed UI.
+- **Wallet Management**: Seamlessly deposit and withdraw funds directly from the app with instant balance updates.
+- **Local Watchlist**: Star your favorite assets for quick access, saved securely on your device.
 - **Transaction History**: Filterable history of all your redemptions and transfers.
 
 ---
@@ -72,8 +74,9 @@ We carefully selected packages that are well-maintained and industry-standard.
 - **Navigation**: [`go_router`](https://pub.dev/packages/go_router) (Declarative routing)
 - **Networking**: [`dio`](https://pub.dev/packages/dio) (Powerful HTTP client)
 - **Dependency Injection**: [`get_it`](https://pub.dev/packages/get_it) (Service Locator)
-- **Security**:
+- **Security & Storage**:
   - [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage)
+  - [`shared_preferences`](https://pub.dev/packages/shared_preferences) (For local preferences and Watchlist)
   - [`local_auth`](https://pub.dev/packages/local_auth)
   - [`crypto`](https://pub.dev/packages/crypto)
 - **UI Components**:
