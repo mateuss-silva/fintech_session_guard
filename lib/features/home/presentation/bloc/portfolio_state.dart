@@ -18,17 +18,38 @@ class PortfolioLoading extends PortfolioState {
 
 class PortfolioLoaded extends PortfolioState {
   final PortfolioSummaryEntity portfolio;
+  final List<String> watchlist;
 
-  const PortfolioLoaded(this.portfolio);
+  const PortfolioLoaded(this.portfolio, {this.watchlist = const []});
 
   @override
-  List<Object> get props => [portfolio];
+  List<Object> get props => [portfolio, watchlist];
 }
 
 class PortfolioError extends PortfolioState {
   final String message;
 
   const PortfolioError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class WalletTransactionInProgress extends PortfolioState {
+  const WalletTransactionInProgress();
+}
+
+class WalletTransactionSuccess extends PortfolioState {
+  final String message;
+  const WalletTransactionSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class WalletTransactionFailure extends PortfolioState {
+  final String message;
+  const WalletTransactionFailure(this.message);
 
   @override
   List<Object> get props => [message];

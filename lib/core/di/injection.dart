@@ -17,7 +17,11 @@ import '../../features/home/data/datasources/portfolio_remote_data_source.dart';
 import '../../features/home/data/repositories/portfolio_repository_impl.dart';
 import '../../features/home/domain/repositories/portfolio_repository.dart';
 import '../../features/home/domain/usecases/get_portfolio_summary_usecase.dart';
-import '../../features/home/presentation/bloc/portfolio_bloc.dart';
+import 'package:fintech_session_guard/features/home/domain/usecases/wallet_usecases.dart';
+import 'package:fintech_session_guard/features/home/domain/usecases/watchlist_usecases.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fintech_session_guard/features/home/data/datasources/watchlist_local_data_source.dart';
 
 /// Global service locator instance.
 final sl = GetIt.instance;
@@ -25,9 +29,12 @@ final sl = GetIt.instance;
 /// Initialize all dependencies following the dependency rule:
 /// External → Core → Data → Domain → Presentation
 Future<void> initDependencies() async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+
   // ───────────────────────────────────────────────────────────
   // Core Services (Singletons)
   // ───────────────────────────────────────────────────────────
+  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
   sl.registerLazySingleton<SecureStorageService>(() => SecureStorageService());
 
   sl.registerLazySingleton<ApiClient>(
@@ -78,11 +85,18 @@ Future<void> initDependencies() async {
     () => RxAssetPriceServiceFactory.create(sl<ApiClient>()),
   );
 
+  sl.registerLazySingleton<WatchlistLocalDataSource>(
+    () => WatchlistLocalDataSourceImpl(
+      sharedPreferences: sl<SharedPreferences>(),
+    ),
+  );
+
   // Repository
   sl.registerLazySingleton<PortfolioRepository>(
     () => PortfolioRepositoryImpl(
       remoteDataSource: sl<PortfolioRemoteDataSource>(),
       priceService: sl<AssetPriceService>(),
+      localDataSource: sl<WatchlistLocalDataSource>(),
     ),
   );
 
@@ -91,10 +105,32 @@ Future<void> initDependencies() async {
     () => GetPortfolioSummaryUseCase(sl<PortfolioRepository>()),
   );
 
+  sl.registerLazySingleton<DepositUseCase>(
+    () => DepositUseCase(sl<PortfolioRepository>()),
+  );
+  sl.registerLazySingleton<WithdrawUseCase>(
+    () => WithdrawUseCase(sl<PortfolioRepository>()),
+  );
+
+  sl.registerLazySingleton<GetWatchlistUseCase>(
+    () => GetWatchlistUseCase(sl<PortfolioRepository>()),
+  );
+  sl.registerLazySingleton<AddTickerUseCase>(
+    () => AddTickerUseCase(sl<PortfolioRepository>()),
+  );
+  sl.registerLazySingleton<RemoveTickerUseCase>(
+    () => RemoveTickerUseCase(sl<PortfolioRepository>()),
+  );
+
   // Bloc
   sl.registerFactory<PortfolioBloc>(
     () => PortfolioBloc(
       getPortfolioSummaryUseCase: sl<GetPortfolioSummaryUseCase>(),
+      depositUseCase: sl<DepositUseCase>(),
+      withdrawUseCase: sl<WithdrawUseCase>(),
+      getWatchlistUseCase: sl<GetWatchlistUseCase>(),
+      addTickerUseCase: sl<AddTickerUseCase>(),
+      removeTickerUseCase: sl<RemoveTickerUseCase>(),
     ),
   );
 }

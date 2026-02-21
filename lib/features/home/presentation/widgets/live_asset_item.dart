@@ -5,12 +5,16 @@ import 'package:fintech_session_guard/core/di/injection.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/asset_entity.dart';
 import 'package:fintech_session_guard/features/home/domain/repositories/portfolio_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LiveAssetItem extends StatefulWidget {
   final AssetEntity asset;
+  final bool isWatched;
 
-  const LiveAssetItem({super.key, required this.asset});
+  const LiveAssetItem({super.key, required this.asset, this.isWatched = false});
 
   @override
   State<LiveAssetItem> createState() => _LiveAssetItemState();
@@ -207,6 +211,26 @@ class _LiveAssetItemState extends State<LiveAssetItem>
                     ],
                   ),
                 ],
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(
+                  widget.isWatched ? Icons.star : Icons.star_border,
+                  color: widget.isWatched
+                      ? Colors.amber
+                      : AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  if (widget.isWatched) {
+                    context.read<PortfolioBloc>().add(
+                      WatchlistRemoved(widget.asset.ticker),
+                    );
+                  } else {
+                    context.read<PortfolioBloc>().add(
+                      WatchlistAdded(widget.asset.ticker),
+                    );
+                  }
+                },
               ),
             ],
           ),

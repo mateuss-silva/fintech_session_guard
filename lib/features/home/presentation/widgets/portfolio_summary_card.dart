@@ -5,8 +5,15 @@ import 'package:intl/intl.dart';
 
 class PortfolioSummaryCard extends StatelessWidget {
   final PortfolioSummaryEntity summary;
+  final VoidCallback? onDeposit;
+  final VoidCallback? onWithdraw;
 
-  const PortfolioSummaryCard({super.key, required this.summary});
+  const PortfolioSummaryCard({
+    super.key,
+    required this.summary,
+    this.onDeposit,
+    this.onWithdraw,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +81,60 @@ class PortfolioSummaryCard extends StatelessWidget {
                   '${summary.variationPct >= 0 ? '+' : ''}${percentFormat.format(summary.variationPct / 100)}',
                   summary.variationPct >= 0 ? AppColors.profit : AppColors.loss,
                   isProfit: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: () => onDeposit?.call(),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Deposit',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.cardBorder),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: () => onWithdraw?.call(),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.arrow_downward, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Withdraw',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -72,3 +72,11 @@ class ValidationFailure extends Failure {
     super.code = 'VALIDATION_ERROR',
   });
 }
+
+/// Local storage error.
+class CacheFailure extends Failure {
+  const CacheFailure({
+    super.message = 'Local cache error.',
+    super.code = 'CACHE_ERROR',
+  });
+}

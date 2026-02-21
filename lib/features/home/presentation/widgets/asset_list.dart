@@ -4,8 +4,9 @@ import 'package:fintech_session_guard/features/home/presentation/widgets/live_as
 
 class AssetList extends StatelessWidget {
   final List<AssetEntity> assets;
+  final List<String> watchlist;
 
-  const AssetList({super.key, required this.assets});
+  const AssetList({super.key, required this.assets, this.watchlist = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,8 @@ class AssetList extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final asset = assets[index];
-        return LiveAssetItem(asset: asset);
+        final isWatched = watchlist.contains(asset.ticker);
+        return LiveAssetItem(asset: asset, isWatched: isWatched);
       },
     );
   }

@@ -6,4 +6,10 @@ import 'package:fintech_session_guard/features/home/domain/entities/portfolio_su
 abstract class PortfolioRepository {
   Future<Either<Failure, PortfolioSummaryEntity>> getPortfolioSummary();
   Stream<AssetPriceUpdate> getAssetPriceStream(String ticker);
+  Future<Either<Failure, void>> depositMoney(double amount);
+  Future<Either<Failure, void>> withdrawMoney(double amount);
+
+  Future<Either<Failure, List<String>>> getWatchlist();
+  Future<Either<Failure, void>> addWatchlistTicker(String ticker);
+  Future<Either<Failure, void>> removeWatchlistTicker(String ticker);
 }
