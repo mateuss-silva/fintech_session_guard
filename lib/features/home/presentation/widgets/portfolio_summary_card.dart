@@ -43,7 +43,7 @@ class PortfolioSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Total Balance',
+              'Total Portfolio Value',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
@@ -81,6 +81,26 @@ class PortfolioSummaryCard extends StatelessWidget {
                   '${summary.variationPct >= 0 ? '+' : ''}${percentFormat.format(summary.variationPct / 100)}',
                   summary.variationPct >= 0 ? AppColors.profit : AppColors.loss,
                   isProfit: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(color: Colors.white24),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildStat(
+                  context,
+                  'Investment Available',
+                  currencyFormat.format(summary.availableForInvestment),
+                  AppColors.textPrimary,
+                ),
+                _buildStat(
+                  context,
+                  'Withdrawal Available',
+                  currencyFormat.format(summary.availableForWithdrawal),
+                  AppColors.textPrimary,
                 ),
               ],
             ),

@@ -8,6 +8,8 @@ class PortfolioSummaryEntity extends Equatable {
   final double totalProfit;
   final double variationPct;
   final double availableBalance;
+  final double availableForInvestment;
+  final double availableForWithdrawal;
   final int totalAssets;
   final List<AssetEntity> assets;
 
@@ -18,6 +20,8 @@ class PortfolioSummaryEntity extends Equatable {
     required this.totalProfit,
     required this.variationPct,
     required this.availableBalance,
+    required this.availableForInvestment,
+    required this.availableForWithdrawal,
     required this.totalAssets,
     required this.assets,
   });
@@ -30,6 +34,8 @@ class PortfolioSummaryEntity extends Equatable {
     totalProfit,
     variationPct,
     availableBalance,
+    availableForInvestment,
+    availableForWithdrawal,
     totalAssets,
     assets,
   ];

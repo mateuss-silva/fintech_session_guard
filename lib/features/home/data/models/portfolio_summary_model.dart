@@ -9,6 +9,8 @@ class PortfolioSummaryModel extends PortfolioSummaryEntity {
     required super.totalProfit,
     required super.variationPct,
     required super.availableBalance,
+    required super.availableForInvestment,
+    required super.availableForWithdrawal,
     required super.totalAssets,
     required super.assets,
   });
@@ -33,6 +35,14 @@ class PortfolioSummaryModel extends PortfolioSummaryEntity {
       variationPct: variationPct,
       availableBalance:
           (summary['availableBalance'] as num?)?.toDouble() ?? 0.0,
+      availableForInvestment:
+          (summary['availableForInvestment'] as num?)?.toDouble() ??
+          (summary['availableBalance'] as num?)?.toDouble() ??
+          0.0,
+      availableForWithdrawal:
+          (summary['availableForWithdrawal'] as num?)?.toDouble() ??
+          (summary['totalBalance'] as num?)?.toDouble() ??
+          0.0,
       totalAssets: (summary['totalAssets'] as num?)?.toInt() ?? 0,
       assets: assetsList
           .map((e) => AssetModel.fromJson(e as Map<String, dynamic>))
@@ -49,6 +59,8 @@ class PortfolioSummaryModel extends PortfolioSummaryEntity {
         'totalProfit': totalProfit,
         'variationPct': variationPct,
         'availableBalance': availableBalance,
+        'availableForInvestment': availableForInvestment,
+        'availableForWithdrawal': availableForWithdrawal,
         'totalAssets': totalAssets,
       },
       'assets': assets.map((e) => (e as AssetModel).toJson()).toList(),
