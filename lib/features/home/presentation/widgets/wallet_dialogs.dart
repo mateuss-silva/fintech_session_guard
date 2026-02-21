@@ -37,7 +37,7 @@ class WalletDialogs {
     required Function(double amount) onConfirm,
   }) async {
     final TextEditingController controller = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     await showDialog(
       context: context,
@@ -55,7 +55,7 @@ class WalletDialogs {
             ),
           ),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -89,8 +89,9 @@ class WalletDialogs {
                     ),
                   ],
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Enter an amount';
+                    }
                     final amount = double.tryParse(value);
                     if (amount == null || amount <= 0) return 'Invalid amount';
                     return null;
@@ -115,7 +116,7 @@ class WalletDialogs {
                 ),
               ),
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
+                if (formKey.currentState!.validate()) {
                   final amount = double.parse(controller.text);
                   Navigator.pop(context);
                   onConfirm(amount);

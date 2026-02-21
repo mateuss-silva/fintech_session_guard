@@ -1,5 +1,4 @@
 import 'package:fintech_session_guard/features/home/data/datasources/asset_price_service.dart';
-import 'package:fintech_session_guard/features/home/domain/entities/asset_price_update.dart';
 
 import 'package:fintech_session_guard/core/network/api_client.dart';
 import 'rx_asset_price_service_stub.dart'

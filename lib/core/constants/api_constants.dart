@@ -37,4 +37,7 @@ class ApiConstants {
 
   // ─── Portfolio ─────────────────────────────────────────────────
   static const String portfolio = '/portfolio';
+
+  // ─── Market ────────────────────────────────────────────────────
+  static const String marketSearch = '/market/instruments';
 }

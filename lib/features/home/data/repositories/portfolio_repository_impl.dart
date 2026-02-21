@@ -8,22 +8,42 @@ import 'package:fintech_session_guard/features/home/domain/repositories/portfoli
 import 'package:fintech_session_guard/features/home/data/datasources/asset_price_service.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/asset_price_update.dart';
 
+import 'package:fintech_session_guard/features/home/data/datasources/portfolio_stream_service.dart';
 import 'package:fintech_session_guard/features/home/data/datasources/watchlist_local_data_source.dart';
 
 class PortfolioRepositoryImpl implements PortfolioRepository {
   final PortfolioRemoteDataSource remoteDataSource;
   final AssetPriceService priceService;
   final WatchlistLocalDataSource localDataSource;
+  final PortfolioStreamService portfolioStreamService;
 
   PortfolioRepositoryImpl({
     required this.remoteDataSource,
     required this.priceService,
     required this.localDataSource,
+    required this.portfolioStreamService,
   });
 
   @override
   Stream<AssetPriceUpdate> getAssetPriceStream(String ticker) {
     return priceService.getPriceStream(ticker);
+  }
+
+  @override
+  Stream<Either<Failure, PortfolioSummaryEntity>> getPortfolioStream() async* {
+    try {
+      await for (final model in portfolioStreamService.getPortfolioStream()) {
+        yield Right(model);
+      }
+    } on ServerException catch (e) {
+      yield Left(ServerFailure(message: e.message, code: e.code));
+    } on UnauthorizedException catch (e) {
+      yield Left(AuthFailure(message: e.message, code: e.code));
+    } on SessionExpiredException {
+      yield const Left(SessionExpiredFailure());
+    } catch (e) {
+      yield Left(ServerFailure(message: e.toString()));
+    }
   }
 
   @override

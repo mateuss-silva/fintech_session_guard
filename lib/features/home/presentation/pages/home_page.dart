@@ -10,6 +10,7 @@ import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_
 import 'package:fintech_session_guard/features/home/presentation/widgets/asset_list.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/portfolio_summary_card.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/wallet_dialogs.dart';
+import 'package:fintech_session_guard/features/market/presentation/widgets/instrument_search_delegate.dart';
 
 import 'package:fintech_session_guard/core/presentation/widgets/responsive_scaffold.dart';
 
@@ -26,6 +27,15 @@ class HomePage extends StatelessWidget {
           return ResponsiveScaffold(
             title: 'My Portfolio',
             actions: [
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  showSearch(
+                    context: context,
+                    delegate: InstrumentSearchDelegate(),
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () {

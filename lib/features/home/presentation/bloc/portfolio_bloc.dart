@@ -3,8 +3,11 @@ import 'package:fintech_session_guard/core/error/failures.dart';
 import 'package:fintech_session_guard/features/home/domain/usecases/get_portfolio_summary_usecase.dart';
 import 'package:fintech_session_guard/features/home/domain/usecases/wallet_usecases.dart';
 import 'package:fintech_session_guard/features/home/domain/usecases/watchlist_usecases.dart';
-import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_state.dart';
+import 'package:fintech_session_guard/features/home/domain/usecases/stream_portfolio_usecase.dart';
+import 'package:dartz/dartz.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
 
 class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   final GetPortfolioSummaryUseCase _getPortfolioSummaryUseCase;
@@ -14,6 +17,9 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   final AddTickerUseCase _addTickerUseCase;
   final RemoveTickerUseCase _removeTickerUseCase;
 
+  final StreamPortfolioUseCase _streamPortfolioUseCase;
+  List<String> _currentWatchlist = [];
+
   PortfolioBloc({
     required GetPortfolioSummaryUseCase getPortfolioSummaryUseCase,
     required DepositUseCase depositUseCase,
@@ -21,12 +27,14 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     required GetWatchlistUseCase getWatchlistUseCase,
     required AddTickerUseCase addTickerUseCase,
     required RemoveTickerUseCase removeTickerUseCase,
+    required StreamPortfolioUseCase streamPortfolioUseCase,
   }) : _getPortfolioSummaryUseCase = getPortfolioSummaryUseCase,
        _depositUseCase = depositUseCase,
        _withdrawUseCase = withdrawUseCase,
        _getWatchlistUseCase = getWatchlistUseCase,
        _addTickerUseCase = addTickerUseCase,
        _removeTickerUseCase = removeTickerUseCase,
+       _streamPortfolioUseCase = streamPortfolioUseCase,
        super(const PortfolioInitial()) {
     on<PortfolioSummaryRequested>(_onSummaryRequested);
     on<PortfolioRefreshed>(_onRefreshed);
@@ -41,7 +49,25 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     Emitter<PortfolioState> emit,
   ) async {
     emit(const PortfolioLoading());
-    await _fetchPortfolio(emit);
+
+    // Load initial watchlist to have it ready for the stream
+    final watchlistResult = await _getWatchlistUseCase();
+    watchlistResult.fold(
+      (_) => _currentWatchlist = [],
+      (list) => _currentWatchlist = list,
+    );
+
+    await emit.forEach<Either<Failure, PortfolioSummaryEntity>>(
+      _streamPortfolioUseCase(),
+      onData: (result) {
+        return result.fold(
+          (failure) => PortfolioError(_mapFailureToMessage(failure)),
+          (portfolio) =>
+              PortfolioLoaded(portfolio, watchlist: _currentWatchlist),
+        );
+      },
+      onError: (error, stackTrace) => PortfolioError(error.toString()),
+    );
   }
 
   Future<void> _onRefreshed(
@@ -56,7 +82,9 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     Emitter<PortfolioState> emit,
   ) async {
     await _addTickerUseCase(event.ticker);
-    await _fetchPortfolio(emit);
+    if (!_currentWatchlist.contains(event.ticker)) {
+      _currentWatchlist.add(event.ticker);
+    }
   }
 
   Future<void> _onWatchlistRemoved(
@@ -64,7 +92,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     Emitter<PortfolioState> emit,
   ) async {
     await _removeTickerUseCase(event.ticker);
-    await _fetchPortfolio(emit);
+    _currentWatchlist.remove(event.ticker);
   }
 
   Future<void> _onDepositRequested(
@@ -79,7 +107,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
           emit(WalletTransactionFailure(_mapFailureToMessage(failure))),
       (_) {
         emit(const WalletTransactionSuccess('Deposit successful'));
-        add(const PortfolioSummaryRequested());
+        // Stream automatically updates the balance, no need to manually fetch.
       },
     );
   }
@@ -96,7 +124,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
           emit(WalletTransactionFailure(_mapFailureToMessage(failure))),
       (_) {
         emit(const WalletTransactionSuccess('Withdrawal successful'));
-        add(const PortfolioSummaryRequested());
+        // Stream automatically updates the balance, no need to manually fetch.
       },
     );
   }
@@ -110,8 +138,11 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       (portfolio) {
         watchlistResult.fold(
           (failure) =>
-              emit(PortfolioLoaded(portfolio)), // Render without if fails
-          (watchlist) => emit(PortfolioLoaded(portfolio, watchlist: watchlist)),
+              emit(PortfolioLoaded(portfolio, watchlist: _currentWatchlist)),
+          (watchlist) {
+            _currentWatchlist = watchlist;
+            emit(PortfolioLoaded(portfolio, watchlist: watchlist));
+          },
         );
       },
     );

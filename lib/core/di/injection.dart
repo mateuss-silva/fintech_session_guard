@@ -11,17 +11,26 @@ import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
+import '../../features/market/data/datasources/market_remote_data_source.dart';
+import '../../features/market/data/repositories/market_repository_impl.dart';
+import '../../features/market/domain/repositories/market_repository.dart';
+import '../../features/market/domain/usecases/search_instruments_usecase.dart';
+import '../../features/market/presentation/bloc/market_bloc.dart';
+
 import '../../features/home/data/datasources/asset_price_service.dart';
 import '../../features/home/data/datasources/rx_asset_price_service_factory.dart';
 import '../../features/home/data/datasources/portfolio_remote_data_source.dart';
 import '../../features/home/data/repositories/portfolio_repository_impl.dart';
 import '../../features/home/domain/repositories/portfolio_repository.dart';
-import '../../features/home/domain/usecases/get_portfolio_summary_usecase.dart';
+import 'package:fintech_session_guard/features/home/domain/usecases/get_portfolio_summary_usecase.dart';
+import 'package:fintech_session_guard/features/home/domain/usecases/stream_portfolio_usecase.dart';
 import 'package:fintech_session_guard/features/home/domain/usecases/wallet_usecases.dart';
 import 'package:fintech_session_guard/features/home/domain/usecases/watchlist_usecases.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fintech_session_guard/features/home/data/datasources/watchlist_local_data_source.dart';
+import 'package:fintech_session_guard/features/home/data/datasources/portfolio_stream_service.dart';
+import 'package:fintech_session_guard/features/home/data/datasources/rx_portfolio_service_factory.dart';
 
 /// Global service locator instance.
 final sl = GetIt.instance;
@@ -85,6 +94,13 @@ Future<void> initDependencies() async {
     () => RxAssetPriceServiceFactory.create(sl<ApiClient>()),
   );
 
+  sl.registerLazySingleton<PortfolioStreamService>(
+    () => RxPortfolioServiceFactory.create(
+      sl<ApiClient>(),
+      sl<SecureStorageService>(),
+    ),
+  );
+
   sl.registerLazySingleton<WatchlistLocalDataSource>(
     () => WatchlistLocalDataSourceImpl(
       sharedPreferences: sl<SharedPreferences>(),
@@ -97,12 +113,17 @@ Future<void> initDependencies() async {
       remoteDataSource: sl<PortfolioRemoteDataSource>(),
       priceService: sl<AssetPriceService>(),
       localDataSource: sl<WatchlistLocalDataSource>(),
+      portfolioStreamService: sl<PortfolioStreamService>(),
     ),
   );
 
   // Use Case
   sl.registerLazySingleton<GetPortfolioSummaryUseCase>(
     () => GetPortfolioSummaryUseCase(sl<PortfolioRepository>()),
+  );
+
+  sl.registerLazySingleton<StreamPortfolioUseCase>(
+    () => StreamPortfolioUseCase(sl<PortfolioRepository>()),
   );
 
   sl.registerLazySingleton<DepositUseCase>(
@@ -125,6 +146,7 @@ Future<void> initDependencies() async {
   // Bloc
   sl.registerFactory<PortfolioBloc>(
     () => PortfolioBloc(
+      streamPortfolioUseCase: sl<StreamPortfolioUseCase>(),
       getPortfolioSummaryUseCase: sl<GetPortfolioSummaryUseCase>(),
       depositUseCase: sl<DepositUseCase>(),
       withdrawUseCase: sl<WithdrawUseCase>(),
@@ -132,5 +154,24 @@ Future<void> initDependencies() async {
       addTickerUseCase: sl<AddTickerUseCase>(),
       removeTickerUseCase: sl<RemoveTickerUseCase>(),
     ),
+  );
+
+  // ───────────────────────────────────────────────────────────
+  // Feature: Market
+  // ───────────────────────────────────────────────────────────
+  sl.registerLazySingleton<MarketRemoteDataSource>(
+    () => MarketRemoteDataSourceImpl(sl<ApiClient>()),
+  );
+
+  sl.registerLazySingleton<MarketRepository>(
+    () => MarketRepositoryImpl(remoteDataSource: sl<MarketRemoteDataSource>()),
+  );
+
+  sl.registerLazySingleton<SearchInstrumentsUseCase>(
+    () => SearchInstrumentsUseCase(sl<MarketRepository>()),
+  );
+
+  sl.registerFactory<MarketBloc>(
+    () => MarketBloc(searchInstrumentsUseCase: sl<SearchInstrumentsUseCase>()),
   );
 }
