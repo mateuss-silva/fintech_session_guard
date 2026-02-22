@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:confetti/confetti.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/withdraw_preview_entity.dart';
 
@@ -28,6 +29,25 @@ class WalletDialogs {
       actionColor: AppColors.loss,
       onConfirm: onConfirm,
     );
+  }
+
+  static Future<void> showSuccessDialog(
+    BuildContext context,
+    String message,
+  ) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return _ConfettiSuccessDialog(message: message);
+      },
+    );
+
+    // Auto-close after 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   static Future<void> _showAmountDialog(
@@ -237,6 +257,91 @@ class WalletDialogs {
           ],
         );
       },
+    );
+  }
+}
+
+class _ConfettiSuccessDialog extends StatefulWidget {
+  final String message;
+
+  const _ConfettiSuccessDialog({required this.message});
+
+  @override
+  State<_ConfettiSuccessDialog> createState() => _ConfettiSuccessDialogState();
+}
+
+class _ConfettiSuccessDialogState extends State<_ConfettiSuccessDialog> {
+  late ConfettiController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ConfettiController(duration: const Duration(seconds: 2));
+    _controller.play();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Dialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: AppColors.profit,
+                  size: 64,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Done!',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _controller,
+            blastDirectionality: BlastDirectionality.explosive, // radial effect
+            shouldLoop: false,
+            colors: const [
+              AppColors.profit,
+              AppColors.primary,
+              AppColors.secondary,
+              AppColors.warning,
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

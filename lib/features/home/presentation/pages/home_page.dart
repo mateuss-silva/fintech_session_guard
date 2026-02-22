@@ -71,15 +71,7 @@ class HomePage extends StatelessWidget {
                         },
                       );
                     } else if (state is WalletTransactionSuccess) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            state.message,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          backgroundColor: AppColors.profit,
-                        ),
-                      );
+                      WalletDialogs.showSuccessDialog(context, state.message);
                     } else if (state is WalletTransactionFailure) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
