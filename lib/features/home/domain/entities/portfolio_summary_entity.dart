@@ -11,6 +11,7 @@ class PortfolioSummaryEntity extends Equatable {
   final double availableForInvestment;
   final double availableForWithdrawal;
   final int totalAssets;
+  final bool isMarketOpen;
   final List<AssetEntity> assets;
 
   const PortfolioSummaryEntity({
@@ -23,6 +24,7 @@ class PortfolioSummaryEntity extends Equatable {
     required this.availableForInvestment,
     required this.availableForWithdrawal,
     required this.totalAssets,
+    required this.isMarketOpen,
     required this.assets,
   });
 
@@ -37,6 +39,7 @@ class PortfolioSummaryEntity extends Equatable {
     availableForInvestment,
     availableForWithdrawal,
     totalAssets,
+    isMarketOpen,
     assets,
   ];
 }

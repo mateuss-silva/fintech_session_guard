@@ -107,15 +107,16 @@ class PortfolioSummaryCard extends StatelessWidget {
               children: [
                 _buildStat(
                   context,
-                  'Investment Available',
+                  'Available Cash',
                   currencyFormat.format(summary.availableForInvestment),
                   AppColors.textPrimary,
                 ),
                 _buildStat(
                   context,
-                  'Withdrawal Available',
-                  currencyFormat.format(summary.availableForWithdrawal),
-                  AppColors.textPrimary,
+                  'Market Status',
+                  summary.isMarketOpen ? 'Open' : 'Closed',
+                  summary.isMarketOpen ? AppColors.profit : AppColors.loss,
+                  isProfit: true,
                 ),
               ],
             ),
