@@ -69,14 +69,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                   label: Text('Settings'),
                 ),
               ],
-              unselectedLabelTextStyle: const TextStyle(
-                color: AppColors.textSecondary,
-              ),
-              selectedLabelTextStyle: const TextStyle(color: AppColors.primary),
-              unselectedIconTheme: const IconThemeData(
-                color: AppColors.textSecondary,
-              ),
-              selectedIconTheme: const IconThemeData(color: AppColors.primary),
+              unselectedLabelTextStyle: const TextStyle(color: Colors.white70),
+              selectedLabelTextStyle: const TextStyle(color: Colors.white),
+              unselectedIconTheme: const IconThemeData(color: Colors.white70),
+              selectedIconTheme: const IconThemeData(color: Colors.white),
             ),
             const VerticalDivider(
               thickness: 1,
@@ -118,8 +114,8 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
             _selectedIndex = index;
           });
         },
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(

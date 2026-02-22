@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/transaction_entity.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/withdraw_preview_entity.dart';
 
 abstract class PortfolioState extends Equatable {
@@ -61,6 +62,28 @@ class WalletTransactionSuccess extends PortfolioState {
 class WalletTransactionFailure extends PortfolioState {
   final String message;
   const WalletTransactionFailure(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class TransactionHistoryLoading extends PortfolioState {
+  const TransactionHistoryLoading();
+}
+
+class TransactionHistoryLoaded extends PortfolioState {
+  final List<TransactionEntity> transactions;
+
+  const TransactionHistoryLoaded(this.transactions);
+
+  @override
+  List<Object> get props => [transactions];
+}
+
+class TransactionHistoryError extends PortfolioState {
+  final String message;
+
+  const TransactionHistoryError(this.message);
 
   @override
   List<Object> get props => [message];

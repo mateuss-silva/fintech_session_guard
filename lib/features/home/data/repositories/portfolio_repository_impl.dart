@@ -3,6 +3,7 @@ import 'package:fintech_session_guard/core/error/exceptions.dart';
 import 'package:fintech_session_guard/core/error/failures.dart';
 import 'package:fintech_session_guard/features/home/data/datasources/portfolio_remote_data_source.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/transaction_entity.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/withdraw_preview_entity.dart';
 import 'package:fintech_session_guard/features/home/domain/repositories/portfolio_repository.dart';
 
@@ -92,6 +93,26 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
     try {
       final preview = await remoteDataSource.previewWithdraw(amount);
       return Right(preview);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<TransactionEntity>>> getTransactionHistory({
+    int limit = 50,
+    int offset = 0,
+    String? type,
+  }) async {
+    try {
+      final history = await remoteDataSource.getTransactionHistory(
+        limit: limit,
+        offset: offset,
+        type: type,
+      );
+      return Right(history);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
     } catch (e) {

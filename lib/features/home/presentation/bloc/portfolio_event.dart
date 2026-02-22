@@ -62,6 +62,21 @@ class WatchlistRemoved extends PortfolioEvent {
   List<Object> get props => [ticker];
 }
 
+class TransactionHistoryRequested extends PortfolioEvent {
+  final int limit;
+  final int offset;
+  final String? type;
+
+  const TransactionHistoryRequested({
+    this.limit = 50,
+    this.offset = 0,
+    this.type,
+  });
+
+  @override
+  List<Object> get props => [limit, offset, type ?? ''];
+}
+
 class PortfolioStreamUpdated extends PortfolioEvent {
   final Either<Failure, PortfolioSummaryEntity> result;
   const PortfolioStreamUpdated(this.result);

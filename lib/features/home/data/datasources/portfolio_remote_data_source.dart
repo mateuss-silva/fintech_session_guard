@@ -3,6 +3,7 @@ import 'package:fintech_session_guard/core/constants/api_constants.dart';
 import 'package:fintech_session_guard/core/error/exceptions.dart';
 import 'package:fintech_session_guard/core/network/api_client.dart';
 import 'package:fintech_session_guard/features/home/data/models/portfolio_summary_model.dart';
+import 'package:fintech_session_guard/features/home/data/models/transaction_model.dart';
 import 'package:fintech_session_guard/features/home/data/models/withdraw_preview_model.dart';
 
 abstract class PortfolioRemoteDataSource {
@@ -10,6 +11,11 @@ abstract class PortfolioRemoteDataSource {
   Future<void> depositMoney(double amount);
   Future<void> withdrawMoney(double amount);
   Future<WithdrawPreviewModel> previewWithdraw(double amount);
+  Future<List<TransactionModel>> getTransactionHistory({
+    int limit = 50,
+    int offset = 0,
+    String? type,
+  });
 }
 
 class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
@@ -103,6 +109,41 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
           message: e.response?.data['message'] ?? 'Insufficient funds',
         );
       }
+      throw ServerException(message: e.message ?? 'Server error');
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<List<TransactionModel>> getTransactionHistory({
+    int limit = 50,
+    int offset = 0,
+    String? type,
+  }) async {
+    try {
+      final Map<String, dynamic> queryParameters = {
+        'limit': limit,
+        'offset': offset,
+      };
+      if (type != null) {
+        queryParameters['type'] = type;
+      }
+
+      final response = await _client.dio.get(
+        ApiConstants.transactionsHistory,
+        queryParameters: queryParameters,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['transactions'] as List;
+        return data.map((json) => TransactionModel.fromJson(json)).toList();
+      } else {
+        throw const ServerException(
+          message: 'Failed to fetch transaction history',
+        );
+      }
+    } on DioException catch (e) {
       throw ServerException(message: e.message ?? 'Server error');
     } catch (e) {
       throw ServerException(message: e.toString());

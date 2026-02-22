@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
+import 'package:fintech_session_guard/features/home/presentation/widgets/transaction_history_sheet.dart';
 import 'package:intl/intl.dart';
 
 class PortfolioSummaryCard extends StatelessWidget {
@@ -42,14 +43,28 @@ class PortfolioSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Total Portfolio Value',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Portfolio Value',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.history,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: () {
+                    TransactionHistorySheet.show(context);
+                  },
+                  tooltip: 'Transaction History',
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
             Text(
               currencyFormat.format(summary.totalBalance),
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(

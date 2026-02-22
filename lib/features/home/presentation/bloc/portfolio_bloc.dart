@@ -15,6 +15,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   final DepositUseCase _depositUseCase;
   final WithdrawUseCase _withdrawUseCase;
   final PreviewWithdrawUseCase _previewWithdrawUseCase;
+  final GetTransactionHistoryUseCase _getTransactionHistoryUseCase;
   final GetWatchlistUseCase _getWatchlistUseCase;
   final AddTickerUseCase _addTickerUseCase;
   final RemoveTickerUseCase _removeTickerUseCase;
@@ -29,6 +30,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     required DepositUseCase depositUseCase,
     required WithdrawUseCase withdrawUseCase,
     required PreviewWithdrawUseCase previewWithdrawUseCase,
+    required GetTransactionHistoryUseCase getTransactionHistoryUseCase,
     required GetWatchlistUseCase getWatchlistUseCase,
     required AddTickerUseCase addTickerUseCase,
     required RemoveTickerUseCase removeTickerUseCase,
@@ -37,6 +39,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
        _depositUseCase = depositUseCase,
        _withdrawUseCase = withdrawUseCase,
        _previewWithdrawUseCase = previewWithdrawUseCase,
+       _getTransactionHistoryUseCase = getTransactionHistoryUseCase,
        _getWatchlistUseCase = getWatchlistUseCase,
        _addTickerUseCase = addTickerUseCase,
        _removeTickerUseCase = removeTickerUseCase,
@@ -48,6 +51,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     on<WalletDepositRequested>(_onDepositRequested);
     on<WalletWithdrawRequested>(_onWithdrawRequested);
     on<WalletWithdrawConfirmed>(_onWithdrawConfirmed);
+    on<TransactionHistoryRequested>(_onTransactionHistoryRequested);
     on<WatchlistAdded>(_onWatchlistAdded);
     on<WatchlistRemoved>(_onWatchlistRemoved);
   }
@@ -173,6 +177,24 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
       (failure) =>
           emit(WalletTransactionFailure(_mapFailureToMessage(failure))),
       (_) => emit(const WalletTransactionSuccess('Withdrawal successful')),
+    );
+  }
+
+  Future<void> _onTransactionHistoryRequested(
+    TransactionHistoryRequested event,
+    Emitter<PortfolioState> emit,
+  ) async {
+    emit(const TransactionHistoryLoading());
+
+    final result = await _getTransactionHistoryUseCase(
+      limit: event.limit,
+      offset: event.offset,
+      type: event.type,
+    );
+
+    result.fold(
+      (failure) => emit(TransactionHistoryError(_mapFailureToMessage(failure))),
+      (transactions) => emit(TransactionHistoryLoaded(transactions)),
     );
   }
 

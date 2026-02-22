@@ -135,6 +135,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<PreviewWithdrawUseCase>(
     () => PreviewWithdrawUseCase(sl<PortfolioRepository>()),
   );
+  sl.registerLazySingleton<GetTransactionHistoryUseCase>(
+    () => GetTransactionHistoryUseCase(sl<PortfolioRepository>()),
+  );
 
   sl.registerLazySingleton<GetWatchlistUseCase>(
     () => GetWatchlistUseCase(sl<PortfolioRepository>()),
@@ -154,6 +157,7 @@ Future<void> initDependencies() async {
       depositUseCase: sl<DepositUseCase>(),
       withdrawUseCase: sl<WithdrawUseCase>(),
       previewWithdrawUseCase: sl<PreviewWithdrawUseCase>(),
+      getTransactionHistoryUseCase: sl<GetTransactionHistoryUseCase>(),
       getWatchlistUseCase: sl<GetWatchlistUseCase>(),
       addTickerUseCase: sl<AddTickerUseCase>(),
       removeTickerUseCase: sl<RemoveTickerUseCase>(),
