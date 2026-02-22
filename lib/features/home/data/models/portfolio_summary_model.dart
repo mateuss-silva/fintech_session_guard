@@ -1,4 +1,5 @@
 import 'package:fintech_session_guard/features/home/data/models/asset_model.dart';
+import 'package:fintech_session_guard/features/home/data/models/portfolio_type_summary_model.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
 
 class PortfolioSummaryModel extends PortfolioSummaryEntity {
@@ -13,12 +14,14 @@ class PortfolioSummaryModel extends PortfolioSummaryEntity {
     required super.availableForWithdrawal,
     required super.totalAssets,
     required super.isMarketOpen,
+    required super.byType,
     required super.assets,
   });
 
   factory PortfolioSummaryModel.fromJson(Map<String, dynamic> json) {
     final summary = json['summary'] as Map<String, dynamic>? ?? {};
     final assetsList = json['assets'] as List<dynamic>? ?? [];
+    final byTypeList = json['byType'] as List<dynamic>? ?? [];
 
     final totalInvested = (summary['totalInvested'] as num?)?.toDouble() ?? 0.0;
     final totalCurrent = (summary['totalCurrent'] as num?)?.toDouble() ?? 0.0;
@@ -46,6 +49,12 @@ class PortfolioSummaryModel extends PortfolioSummaryEntity {
           0.0,
       totalAssets: (summary['totalAssets'] as num?)?.toInt() ?? 0,
       isMarketOpen: summary['isMarketOpen'] as bool? ?? false,
+      byType: byTypeList
+          .map(
+            (e) =>
+                PortfolioTypeSummaryModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
       assets: assetsList
           .map((e) => AssetModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -66,6 +75,9 @@ class PortfolioSummaryModel extends PortfolioSummaryEntity {
         'totalAssets': totalAssets,
         'isMarketOpen': isMarketOpen,
       },
+      'byType': byType
+          .map((e) => (e as PortfolioTypeSummaryModel).toJson())
+          .toList(),
       'assets': assets.map((e) => (e as AssetModel).toJson()).toList(),
     };
   }

@@ -9,6 +9,7 @@ import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_state.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/asset_list.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/portfolio_summary_card.dart';
+import 'package:fintech_session_guard/features/home/presentation/widgets/portfolio_composition_chart.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/wallet_dialogs.dart';
 import 'package:fintech_session_guard/features/market/presentation/widgets/instrument_search_delegate.dart';
 
@@ -159,6 +160,15 @@ class HomePage extends StatelessWidget {
                                       },
                                     ),
                                     const SizedBox(height: 24),
+                                    if (state.portfolio.byType.isNotEmpty) ...[
+                                      PortfolioCompositionChart(
+                                        byType: state.portfolio.byType,
+                                        totalCurrent:
+                                            state.portfolio.totalCurrent,
+                                        allAssets: state.portfolio.assets,
+                                      ),
+                                      const SizedBox(height: 24),
+                                    ],
                                     DefaultTabController(
                                       length: 2,
                                       child: Column(

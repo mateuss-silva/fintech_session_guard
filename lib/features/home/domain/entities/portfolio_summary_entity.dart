@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/asset_entity.dart';
+import 'package:fintech_session_guard/features/home/domain/entities/portfolio_type_summary_entity.dart';
 
 class PortfolioSummaryEntity extends Equatable {
   final double totalBalance;
@@ -12,6 +13,7 @@ class PortfolioSummaryEntity extends Equatable {
   final double availableForWithdrawal;
   final int totalAssets;
   final bool isMarketOpen;
+  final List<PortfolioTypeSummaryEntity> byType;
   final List<AssetEntity> assets;
 
   const PortfolioSummaryEntity({
@@ -25,6 +27,7 @@ class PortfolioSummaryEntity extends Equatable {
     required this.availableForWithdrawal,
     required this.totalAssets,
     required this.isMarketOpen,
+    required this.byType,
     required this.assets,
   });
 
@@ -40,6 +43,7 @@ class PortfolioSummaryEntity extends Equatable {
     availableForWithdrawal,
     totalAssets,
     isMarketOpen,
+    byType,
     assets,
   ];
 }
