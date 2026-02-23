@@ -1,8 +1,8 @@
-# Session Guard Fintech App 🛡️
+# Guardian Invest 🛡️
 
 **Welcome to the future of secure investing.**
 
-This isn't just another fintech app; it's a fortress for your finances. We've built an investment platform that takes security as seriously as you do, using advanced session management and biometric verification to keep your data safe.
+Guardian Invest is a premium, secure fintech application designed to be a fortress for your finances. This platform allows you to manage your portfolio, trade assets in real-time, and securely deposit or withdraw funds—all protected by advanced session management and biometric verification.
 
 Built with meaningful engineering principles (**Clean Architecture**) and robust state management (**Flutter BLoC**).
 
@@ -10,104 +10,86 @@ Built with meaningful engineering principles (**Clean Architecture**) and robust
 
 ## 🚀 Features
 
+### 💸 Premium Fintech Experience
+
+- **Real-Time Market Data**: Live asset pricing streams directly to your dashboard and trade screens using reactive programming.
+- **Trading Platform**: Search for assets, view live prices, and execute Buy and Sell orders instantly.
+- **Wallet Management**: Seamlessly deposit and withdraw funds directly from the app with instant balance updates. Smart withdrawal logic automatically prompts a liquidation flow if your cash balance is insufficient.
+- **Portfolio Dashboard**: Track your assets and visually monitor your portfolio distribution.
+- **Transaction History**: An organized, chronological list of all your deposits, withdrawals, and trades, including traded quantities and execution prices.
+- **Adaptive Interface**: Whether you're on your phone or your laptop, the app adjusts its layout to fit your screen perfectly.
+
 ### 🔐 Uncompromising Security
 
-We believe your session is sacred.
-
-- **Smart Sessions**: We don't just set a timer; we actively monitor for inactivity (15 mins) and unauthorized device access.
-- **Biometric Guard**: Want to move money or redeem assets? Proving it's you via FaceID or Fingerprint is mandatory.
-- **Device Locking**: Your session is bound to your specific device. If someone steals your token, it's useless elsewhere.
-- **Secure by Default**: We use native secure storage (Keychain/Keystore) because `SharedPreferences` just doesn't cut it for sensitive data.
-- **Privacy Mode**: In a public place? One tap blurs your balances so prying eyes see nothing.
-
-### 💸 A Premium Fintech Experience
-
-Security doesn't have to be ugly.
-
-- **Adaptive Interface**: Whether you're on your phone or your laptop, the app adjusts its layout to fit your screen perfectly (Navigation Rail on Desktop vs. Bottom Bar on Mobile).
-- **Real-Time Portfolio**: Track your assets, view profit/loss in real-time, and manage your investments with a beautiful, dark-themed UI.
-- **Wallet Management**: Seamlessly deposit and withdraw funds directly from the app with instant balance updates.
-- **Local Watchlist**: Star your favorite assets for quick access, saved securely on your device.
-- **Transaction History**: Filterable history of all your redemptions and transfers.
-
----
-
-## 🛡️ Security Architecture
-
-We've implemented a defense-in-depth strategy to protect user data:
-
-| Feature              | Implementation Details                                                                                                                                          |
-| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Secure Storage**   | Uses `flutter_secure_storage` to store JWT tokens and session IDs in the device's secure enclave (Keychain/Keystore).                                           |
-| **Biometrics**       | Uses `local_auth` to gate sensitive actions. On mobile, this triggers native FaceID/Fingerprint prompts.                                                        |
-| **PIN Fallback**     | For platforms without standard biometrics (like Web), we force a secure PIN verification step.                                                                  |
-| **Session Control**  | The app tracks "last active" timestamps. If you're idle for 15 minutes, we automatically lock the session.                                                      |
-| **Network Security** | All API calls use `Dio` interceptors to inject auth tokens automatically and handle 401 (Unauthorized) errors by attempting a token refresh or logging you out. |
+- **Smart Sessions**: Active monitoring for inactivity (15 mins) and unauthorized device access. Automatic logout upon session expiration.
+- **JWT Rotation**: Access tokens are kept short-lived, while refresh tokens automatically rotate in the background. Token reuse detection provides absolute protection against session hijacking.
+- **Biometric & PIN Guard**: Sensitive actions (like buying, selling, or withdrawing) require you to prove your identity. Mobile platforms use native FaceID/Fingerprint, while Web utilizes a secure PIN fallback.
+- **Secure Storage**: JWT tokens and sensitive keys are stored in the device's native secure enclave using `flutter_secure_storage`.
 
 ---
 
 ## 🏗️ State Management
 
-We use **Flutter BLoC** (Business Logic Component) to keep our code clean, testable, and predictable.
+We use **Flutter BLoC** (Business Logic Component) alongside **Provider** to keep our code clean, testable, and predictable.
 
-- **Events & States**: Every action (e.g., "User tapped Redeem") is an `Event`. The BLoC processes it and emits a new `State` (e.g., "Loading", "Success").
-- **Sealed Classes**: We use Dart's sealed classes for states, ensuring the UI handles every possible scenario (no missing error states!).
-- **Separation of Concerns**: The UI never talks to the API directly. It just sends events to the BLoC.
-
-**Example Flow:**
-
-1. **Ui**: User taps "Redeem".
-2. **Event**: `TransactionRedeemRequested` is added to `TransactionBloc`.
-3. **BLoC**: Calls `AuthRepository` to verify PIN/Biometrics.
-4. **BLoC**: If verified, calls `TransactionRepository` to execute the trade.
-5. **State**: Emits `TransactionActionSuccess`.
-6. **UI**: Shows a success snackbar and refreshes the list.
+- **Events & States**: Every action (e.g., "User tapped Buy") is an `Event`. The BLoC processes it and emits a new `State` (e.g., "Loading", "Success", "AuthRequired").
+- **Reactive Streams**: For real-time data like asset prices, we employ `Stream`s and RxDart principles to push live updates from the backend WebSocket/SSE directly to the UI layer without blocking the main thread.
 
 ---
 
-## 📦 Tech Stack & Packages
+## 🧩 Architectural Patterns
 
-We carefully selected packages that are well-maintained and industry-standard.
+The app strongly adheres to **Clean Architecture** principles to ensure absolute separation between business logic and the UI framework.
+
+- **Domain Layer**: Houses the core business logic, Use Cases, and Entities. This layer is pure Dart and has no dependencies on Flutter.
+- **Data Layer**: Contains API implementations (`RemoteDataSource`), DTOs (Models), and the `RepositoryImpl` that bridges the Network layer to the Domain layer.
+- **Presentation Layer**: Contains the Flutter UI, Widgets, and BLoCs.
+
+**Design Patterns utilized:**
+
+- **Repository Pattern**: Abstracts data sources, allowing the app to swap between local cache, mock data, or remote APIs seamlessly.
+- **Dependency Injection**: Facilitated via `get_it`, allowing us to inject singletons and factories across the app for loose coupling.
+- **Interceptor Pattern**: Handled by `Dio`, automatically intercepting outgoing HTTP requests to append Authorization headers and catching 401s to invisibly rotate JWT tokens.
+
+---
+
+## 📦 Tech Stack & Relevant Packages
+
+We carefully selected industry-standard packages for maximum performance:
 
 - **Core Framework**: Flutter 3.10+
-- **State Management**: [`flutter_bloc`](https://pub.dev/packages/flutter_bloc) & [`equatable`](https://pub.dev/packages/equatable)
-- **Navigation**: [`go_router`](https://pub.dev/packages/go_router) (Declarative routing)
-- **Networking**: [`dio`](https://pub.dev/packages/dio) (Powerful HTTP client)
-- **Dependency Injection**: [`get_it`](https://pub.dev/packages/get_it) (Service Locator)
+- **Backend API**: Node.js with Fastify (for HTTP/2 speed and efficient routing)
+- **State Management**:
+  - [`flutter_bloc`](https://pub.dev/packages/flutter_bloc)
+  - [`provider`](https://pub.dev/packages/provider)
+  - [`equatable`](https://pub.dev/packages/equatable) (Value equality for states)
+- **Networking & Data**:
+  - [`dio`](https://pub.dev/packages/dio) (Advanced HTTP client with interceptors)
+  - [`dartz`](https://pub.dev/packages/dartz) (Functional programming & Either types for Error/Success handling)
+- **Dependency Injection**:
+  - [`get_it`](https://pub.dev/packages/get_it) (Service Locator)
 - **Security & Storage**:
-  - [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage)
-  - [`shared_preferences`](https://pub.dev/packages/shared_preferences) (For local preferences and Watchlist)
-  - [`local_auth`](https://pub.dev/packages/local_auth)
-  - [`crypto`](https://pub.dev/packages/crypto)
+  - [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) (Keychain/Keystore)
+  - [`shared_preferences`](https://pub.dev/packages/shared_preferences)
+  - [`local_auth`](https://pub.dev/packages/local_auth) (Biometric prompts)
 - **UI Components**:
   - [`google_fonts`](https://pub.dev/packages/google_fonts)
-  - [`fl_chart`](https://pub.dev/packages/fl_chart) (Charts)
-  - [`shimmer`](https://pub.dev/packages/shimmer) (Loading effects)
-  - [`gap`](https://pub.dev/packages/gap) (Spacing)
-- **Utilities**: [`dartz`](https://pub.dev/packages/dartz) (Functional programming / Either types), [`intl`](https://pub.dev/packages/intl), [`logger`](https://pub.dev/packages/logger)
+  - [`confetti`](https://pub.dev/packages/confetti) (Success celebration animations)
 
 ---
 
 ## 📂 Project Structure
 
-The app follows **Clean Architecture** principles with strict layer separation:
-
 ```
 lib/
-├── core/                   # Shared kernels (Network, Security, DI, Theme)
-├── features/               # Feature-based modules
-│   ├── auth/               # Login, Register, Session Management
-│   ├── portfolio/          # Dashboard, Asset Listing
-│   ├── transactions/       # History, Redeem, Transfer
-│   └── security/           # Security Settings, Device Status
-└── main.dart               # Entry point & App Configuration
+├── core/                   # Shared modules (Network, Security, DI, Theme, Exceptions)
+├── features/               # Vertical slice architecture
+│   ├── auth/               # Login, Register, Tokens
+│   ├── home/               # Dashboard, Portfolio Service, Wallet Dialogs, History
+│   ├── market/             # Asset Search Delegate
+│   ├── trade/              # Buy/Sell Logic, Trade Bottom Sheet, Auth Prompts
+├── main.dart               # Entry point
 ```
-
-Each feature folder is further divided into:
-
-- **Domain**: Entities, Repositories (Interfaces), Use Cases (Pure Dart, no Flutter)
-- **Data**: Models, Data Sources (API calls), Repository Implementations
-- **Presentation**: BLoCs, Pages, Widgets
 
 ---
 
@@ -115,8 +97,7 @@ Each feature folder is further divided into:
 
 1. **Prerequisites**:
    - Flutter SDK (v3.x)
-   - Android Studio / Xcode
-   - Backend API running locally
+   - Node.js backend running on `localhost:3000`
 
 2. **Install Dependencies**:
 
@@ -128,18 +109,4 @@ Each feature folder is further divided into:
    ```bash
    flutter run
    ```
-   _Note: For biometric features to work on emulators, you must enroll a fingerprint/face in the emulator settings._
-
----
-
-## 🧪 Testing
-
-Run unit and widget tests:
-
-```bash
-flutter test
-```
-
-## 📜 License
-
-MIT
+   _Note: Using Google Chrome or Edge is recommended for Web._
