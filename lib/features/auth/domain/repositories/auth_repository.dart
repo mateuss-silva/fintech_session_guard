@@ -40,4 +40,10 @@ abstract class AuthRepository {
 
   /// Verify PIN and return challenge token.
   Future<Either<Failure, String>> verifyPin(String pin);
+
+  /// Check if the user has a PIN configured.
+  Future<Either<Failure, bool>> getPinStatus();
+
+  /// Set or update the user's PIN.
+  Future<Either<Failure, void>> setPin(String pin);
 }

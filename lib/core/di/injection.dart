@@ -14,6 +14,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
+import '../../features/auth/domain/usecases/auth_usecases.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../features/market/data/datasources/market_remote_data_source.dart';
@@ -76,10 +77,19 @@ Future<void> initDependencies() async {
     () => RegisterUseCase(sl<AuthRepository>()),
   );
 
+  sl.registerLazySingleton<GetPinStatusUseCase>(
+    () => GetPinStatusUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<SetPinUseCase>(
+    () => SetPinUseCase(sl<AuthRepository>()),
+  );
+
   sl.registerFactory<AuthBloc>(
     () => AuthBloc(
       loginUseCase: sl<LoginUseCase>(),
       registerUseCase: sl<RegisterUseCase>(),
+      getPinStatusUseCase: sl<GetPinStatusUseCase>(),
+      setPinUseCase: sl<SetPinUseCase>(),
       authRepository: sl<AuthRepository>(),
       secureStorage: sl<SecureStorageService>(),
       sessionMonitor: sl<SessionMonitor>(),

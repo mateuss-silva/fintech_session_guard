@@ -168,4 +168,32 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> getPinStatus() async {
+    try {
+      final status = await _remoteDataSource.getPinStatus();
+      return Right(status);
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> setPin(String pin) async {
+    try {
+      await _remoteDataSource.setPin(pin);
+      return const Right(null);
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

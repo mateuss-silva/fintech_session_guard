@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/auth_usecases.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -14,6 +15,8 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase _loginUseCase;
   final RegisterUseCase _registerUseCase;
+  final GetPinStatusUseCase _getPinStatusUseCase;
+  final SetPinUseCase _setPinUseCase;
   final AuthRepository _authRepository;
   final SecureStorageService _secureStorage;
   final SessionMonitor _sessionMonitor;
@@ -22,11 +25,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required LoginUseCase loginUseCase,
     required RegisterUseCase registerUseCase,
+    required GetPinStatusUseCase getPinStatusUseCase,
+    required SetPinUseCase setPinUseCase,
     required AuthRepository authRepository,
     required SecureStorageService secureStorage,
     required SessionMonitor sessionMonitor,
   }) : _loginUseCase = loginUseCase,
        _registerUseCase = registerUseCase,
+       _getPinStatusUseCase = getPinStatusUseCase,
+       _setPinUseCase = setPinUseCase,
        _authRepository = authRepository,
        _secureStorage = secureStorage,
        _sessionMonitor = sessionMonitor,
@@ -36,6 +43,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthSessionExpired>(_onSessionExpired);
+    on<AuthPinStatusRequested>(_onPinStatusRequested);
+    on<AuthSetPinRequested>(_onSetPinRequested);
 
     _sessionSubscription = _sessionMonitor.onSessionExpired.listen((_) {
       add(const AuthSessionExpired());
@@ -123,6 +132,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       const AuthUnauthenticated(
         message: 'Your session has expired. Please login again.',
       ),
+    );
+  }
+
+  Future<void> _onPinStatusRequested(
+    AuthPinStatusRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await _getPinStatusUseCase();
+    result.fold(
+      // If the request fails, assume no PIN configured (fail-safe / secure default)
+      (_) => emit(const AuthPinStatusLoaded(false)),
+      (hasPinConfigured) => emit(AuthPinStatusLoaded(hasPinConfigured)),
+    );
+  }
+
+  Future<void> _onSetPinRequested(
+    AuthSetPinRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await _setPinUseCase(event.pin);
+    result.fold(
+      (failure) => emit(AuthPinSetFailure(failure.message)),
+      (_) => emit(const AuthPinSetSuccess()),
     );
   }
 }

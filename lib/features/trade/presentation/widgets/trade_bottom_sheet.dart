@@ -15,12 +15,14 @@ class TradeBottomSheet extends StatefulWidget {
   final String ticker;
   final String assetName;
   final double currentPrice;
+  final bool hasPinConfigured;
 
   const TradeBottomSheet({
     super.key,
     required this.ticker,
     required this.assetName,
     required this.currentPrice,
+    this.hasPinConfigured = true,
   });
 
   @override
@@ -335,6 +337,8 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
                 const SizedBox(height: 32),
                 if (isLoading)
                   const Center(child: CircularProgressIndicator())
+                else if (!widget.hasPinConfigured)
+                  _PinRequiredCard(ticker: widget.ticker)
                 else
                   Row(
                     children: [
@@ -391,6 +395,66 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Inline card shown inside the trade sheet when the user has no PIN configured.
+class _PinRequiredCard extends StatelessWidget {
+  final String ticker;
+
+  const _PinRequiredCard({required this.ticker});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF3D2000),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amber.withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lock_outline, color: Colors.amber, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'PIN required',
+                  style: TextStyle(
+                    color: Colors.amber,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Set up a 4-digit PIN to buy or sell assets.',
+                  style: TextStyle(color: Colors.amber, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop(); // close the trade sheet first
+              // The banner on the home page has the Set PIN button
+            },
+            child: const Text(
+              'DISMISS',
+              style: TextStyle(
+                color: Colors.amber,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

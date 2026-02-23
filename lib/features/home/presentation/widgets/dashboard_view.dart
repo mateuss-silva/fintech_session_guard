@@ -11,8 +11,13 @@ import 'package:fintech_session_guard/features/home/presentation/widgets/wallet_
 
 class DashboardView extends StatelessWidget {
   final VoidCallback onHistoryTapped;
+  final bool hasPinConfigured;
 
-  const DashboardView({super.key, required this.onHistoryTapped});
+  const DashboardView({
+    super.key,
+    required this.onHistoryTapped,
+    this.hasPinConfigured = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +98,18 @@ class DashboardView extends StatelessWidget {
                           summary: state.portfolio,
                           onHistoryTapped: onHistoryTapped,
                           onDeposit: () {
+                            if (!hasPinConfigured) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please set up your PIN first to perform transactions.',
+                                  ),
+                                  backgroundColor: Color(0xFF7C4B00),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
                             WalletDialogs.showDepositDialog(
                               context,
                               onConfirm: (amount) {
@@ -103,6 +120,18 @@ class DashboardView extends StatelessWidget {
                             );
                           },
                           onWithdraw: () {
+                            if (!hasPinConfigured) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please set up your PIN first to perform transactions.',
+                                  ),
+                                  backgroundColor: Color(0xFF7C4B00),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
                             WalletDialogs.showWithdrawDialog(
                               context,
                               onConfirm: (amount) {

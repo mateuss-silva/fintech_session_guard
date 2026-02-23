@@ -47,3 +47,16 @@ class AuthLogoutRequested extends AuthEvent {
 class AuthSessionExpired extends AuthEvent {
   const AuthSessionExpired();
 }
+
+class AuthPinStatusRequested extends AuthEvent {
+  const AuthPinStatusRequested();
+}
+
+class AuthSetPinRequested extends AuthEvent {
+  final String pin;
+
+  const AuthSetPinRequested(this.pin);
+
+  @override
+  List<Object?> get props => [pin];
+}

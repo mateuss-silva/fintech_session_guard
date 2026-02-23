@@ -8,6 +8,7 @@ class ResponsiveScaffold extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onIndexChanged;
   final VoidCallback? onSearchTapped;
+  final Widget? banner;
 
   const ResponsiveScaffold({
     super.key,
@@ -17,6 +18,7 @@ class ResponsiveScaffold extends StatelessWidget {
     required this.currentIndex,
     this.onIndexChanged,
     this.onSearchTapped,
+    this.banner,
   });
 
   @override
@@ -80,9 +82,10 @@ class ResponsiveScaffold extends StatelessWidget {
                   AppBar(
                     title: Text(title),
                     actions: actions,
-                    backgroundColor: AppColors.background, // Match scaffold
+                    backgroundColor: AppColors.background,
                     elevation: 0,
                   ),
+                  if (banner != null) banner!,
                   Expanded(child: body),
                 ],
               ),
@@ -96,7 +99,12 @@ class ResponsiveScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: Text(title), actions: actions),
-      body: body,
+      body: Column(
+        children: [
+          if (banner != null) banner!,
+          Expanded(child: body),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.cardColor,
         currentIndex: currentIndex,

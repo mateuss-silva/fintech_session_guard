@@ -25,6 +25,8 @@ class ApiConstants {
   static const String refresh = '/auth/refresh';
   static const String logout = '/auth/logout';
   static const String verifyPin = '/auth/verify-pin';
+  static const String pinStatus = '/auth/pin-status';
+  static const String setPin = '/auth/set-pin';
   static const String sessions = '/auth/sessions';
   static String revokeSession(String id) => '/auth/sessions/$id';
 

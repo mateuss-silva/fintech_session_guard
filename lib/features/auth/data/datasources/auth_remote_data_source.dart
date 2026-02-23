@@ -105,6 +105,25 @@ class AuthRemoteDataSource {
     }
   }
 
+  /// GET /api/auth/pin-status
+  Future<bool> getPinStatus() async {
+    try {
+      final response = await _apiClient.dio.get(ApiConstants.pinStatus);
+      return response.data['hasPinConfigured'] as bool;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  /// POST /api/auth/set-pin
+  Future<void> setPin(String pin) async {
+    try {
+      await _apiClient.dio.post(ApiConstants.setPin, data: {'pin': pin});
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
   Exception _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout) {

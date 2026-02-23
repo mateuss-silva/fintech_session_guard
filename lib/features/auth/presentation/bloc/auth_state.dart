@@ -50,3 +50,25 @@ class AuthError extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+class AuthPinStatusLoaded extends AuthState {
+  final bool hasPinConfigured;
+
+  const AuthPinStatusLoaded(this.hasPinConfigured);
+
+  @override
+  List<Object?> get props => [hasPinConfigured];
+}
+
+class AuthPinSetSuccess extends AuthState {
+  const AuthPinSetSuccess();
+}
+
+class AuthPinSetFailure extends AuthState {
+  final String message;
+
+  const AuthPinSetFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

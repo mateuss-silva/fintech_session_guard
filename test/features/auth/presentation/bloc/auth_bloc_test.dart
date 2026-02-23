@@ -14,9 +14,15 @@ import 'package:fintech_session_guard/features/auth/presentation/bloc/auth_bloc.
 import 'package:fintech_session_guard/features/auth/presentation/bloc/auth_event.dart';
 import 'package:fintech_session_guard/features/auth/presentation/bloc/auth_state.dart';
 
+import 'package:fintech_session_guard/features/auth/domain/usecases/auth_usecases.dart';
+
 class MockLoginUseCase extends Mock implements LoginUseCase {}
 
 class MockRegisterUseCase extends Mock implements RegisterUseCase {}
+
+class MockGetPinStatusUseCase extends Mock implements GetPinStatusUseCase {}
+
+class MockSetPinUseCase extends Mock implements SetPinUseCase {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
@@ -28,6 +34,8 @@ void main() {
   late AuthBloc authBloc;
   late MockLoginUseCase mockLoginUseCase;
   late MockRegisterUseCase mockRegisterUseCase;
+  late MockGetPinStatusUseCase mockGetPinStatusUseCase;
+  late MockSetPinUseCase mockSetPinUseCase;
   late MockAuthRepository mockAuthRepository;
   late MockSecureStorage mockSecureStorage;
   late MockSessionMonitor mockSessionMonitor;
@@ -35,6 +43,8 @@ void main() {
   setUp(() {
     mockLoginUseCase = MockLoginUseCase();
     mockRegisterUseCase = MockRegisterUseCase();
+    mockGetPinStatusUseCase = MockGetPinStatusUseCase();
+    mockSetPinUseCase = MockSetPinUseCase();
     mockAuthRepository = MockAuthRepository();
     mockSecureStorage = MockSecureStorage();
     mockSessionMonitor = MockSessionMonitor();
@@ -51,6 +61,8 @@ void main() {
     authBloc = AuthBloc(
       loginUseCase: mockLoginUseCase,
       registerUseCase: mockRegisterUseCase,
+      getPinStatusUseCase: mockGetPinStatusUseCase,
+      setPinUseCase: mockSetPinUseCase,
       authRepository: mockAuthRepository,
       secureStorage: mockSecureStorage,
       sessionMonitor: mockSessionMonitor,

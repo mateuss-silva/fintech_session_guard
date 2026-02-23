@@ -18,7 +18,13 @@ class AppRouter {
     initialLocation: '/home',
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
-      final isAuthenticated = authBloc.state is AuthAuthenticated;
+      final authState = authBloc.state;
+      // All states that require an authenticated user
+      final isAuthenticated =
+          authState is AuthAuthenticated ||
+          authState is AuthPinStatusLoaded ||
+          authState is AuthPinSetSuccess ||
+          authState is AuthPinSetFailure;
       final isAuthRoute =
           state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
