@@ -18,9 +18,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // TODO: Remove demo credentials before production
-  final _emailController = TextEditingController(text: 'demo@fintech.com');
-  final _passwordController = TextEditingController(text: 'Demo@2024!');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   void _onLoginPressed() {
     context.read<AuthBloc>().add(

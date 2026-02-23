@@ -110,3 +110,15 @@ lib/
    flutter run
    ```
    _Note: Using Google Chrome or Edge is recommended for Web._
+
+---
+
+## 🔐 Demo Credentials
+
+For testing and demonstration purposes, you can use the following account:
+
+- **Email**: `demo@fintech.com`
+- **Password**: `Demo@2024!`
+
+> [!NOTE]
+> This is a pre-configured environment. In a production scenario, always use your own encrypted credentials.
