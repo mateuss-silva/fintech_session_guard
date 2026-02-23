@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 
-class ResponsiveScaffold extends StatefulWidget {
+class ResponsiveScaffold extends StatelessWidget {
   final Widget body;
   final String title;
   final List<Widget>? actions;
+  final int currentIndex;
+  final ValueChanged<int>? onIndexChanged;
   final VoidCallback? onSearchTapped;
 
   const ResponsiveScaffold({
@@ -12,15 +14,10 @@ class ResponsiveScaffold extends StatefulWidget {
     required this.body,
     required this.title,
     this.actions,
+    required this.currentIndex,
+    this.onIndexChanged,
     this.onSearchTapped,
   });
-
-  @override
-  State<ResponsiveScaffold> createState() => _ResponsiveScaffoldState();
-}
-
-class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
-  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +30,13 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
           children: [
             NavigationRail(
               backgroundColor: AppColors.cardColor,
-              selectedIndex: _selectedIndex,
+              selectedIndex: currentIndex,
               onDestinationSelected: (int index) {
                 if (index == 1) {
-                  widget.onSearchTapped?.call();
+                  onSearchTapped?.call();
                   return;
                 }
-                setState(() {
-                  _selectedIndex = index;
-                });
+                onIndexChanged?.call(index);
               },
               labelType: NavigationRailLabelType.all,
               leading: Padding(
@@ -64,9 +59,9 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                   label: Text('Search'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                  icon: Icon(Icons.history_outlined),
+                  selectedIcon: Icon(Icons.history),
+                  label: Text('History'),
                 ),
               ],
               unselectedLabelTextStyle: const TextStyle(color: Colors.white70),
@@ -83,12 +78,12 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
               child: Column(
                 children: [
                   AppBar(
-                    title: Text(widget.title),
-                    actions: widget.actions,
+                    title: Text(title),
+                    actions: actions,
                     backgroundColor: AppColors.background, // Match scaffold
                     elevation: 0,
                   ),
-                  Expanded(child: widget.body),
+                  Expanded(child: body),
                 ],
               ),
             ),
@@ -100,19 +95,17 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
     // Mobile Layout
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(widget.title), actions: widget.actions),
-      body: widget.body,
+      appBar: AppBar(title: Text(title), actions: actions),
+      body: body,
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.cardColor,
-        currentIndex: _selectedIndex,
+        currentIndex: currentIndex,
         onTap: (int index) {
           if (index == 1) {
-            widget.onSearchTapped?.call();
+            onSearchTapped?.call();
             return;
           }
-          setState(() {
-            _selectedIndex = index;
-          });
+          onIndexChanged?.call(index);
         },
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
@@ -129,9 +122,9 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: 'History',
           ),
         ],
       ),

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
-import 'package:fintech_session_guard/features/home/presentation/widgets/transaction_history_sheet.dart';
 import 'package:intl/intl.dart';
 
 class PortfolioSummaryCard extends StatelessWidget {
   final PortfolioSummaryEntity summary;
   final VoidCallback? onDeposit;
   final VoidCallback? onWithdraw;
+  final VoidCallback? onHistoryTapped;
 
   const PortfolioSummaryCard({
     super.key,
     required this.summary,
     this.onDeposit,
     this.onWithdraw,
+    this.onHistoryTapped,
   });
 
   @override
@@ -59,7 +60,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                     color: AppColors.textSecondary,
                   ),
                   onPressed: () {
-                    TransactionHistorySheet.show(context);
+                    onHistoryTapped?.call();
                   },
                   tooltip: 'Transaction History',
                 ),
