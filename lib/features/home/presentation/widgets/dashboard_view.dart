@@ -12,10 +12,12 @@ import 'package:fintech_session_guard/features/home/presentation/widgets/wallet_
 class DashboardView extends StatelessWidget {
   final VoidCallback onHistoryTapped;
   final bool hasPinConfigured;
+  final String userName;
 
   const DashboardView({
     super.key,
     required this.onHistoryTapped,
+    required this.userName,
     this.hasPinConfigured = true,
   });
 
@@ -94,6 +96,8 @@ class DashboardView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _WelcomeHeader(userName: userName),
+                        const SizedBox(height: 20),
                         PortfolioSummaryCard(
                           summary: state.portfolio,
                           onHistoryTapped: onHistoryTapped,
@@ -258,6 +262,53 @@ class DashboardView extends StatelessWidget {
           return const SizedBox.shrink();
         },
       ),
+    );
+  }
+}
+
+/// Time-aware greeting header with the user's name.
+class _WelcomeHeader extends StatelessWidget {
+  final String userName;
+
+  const _WelcomeHeader({required this.userName});
+
+  String get _greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$_greeting,',
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [AppColors.primary, Color(0xFF00B4D8)],
+          ).createShader(bounds),
+          child: Text(
+            '$userName 👋',
+            style: const TextStyle(
+              color: Colors.white, // masked by shader
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

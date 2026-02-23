@@ -24,10 +24,16 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   // null = still checking (no banner yet), false = no PIN (show banner), true = PIN ok
   bool? _hasPinConfigured;
+  String _userName = '';
 
   @override
   void initState() {
     super.initState();
+    // Capture name from AuthAuthenticated before PIN sub-states replace it
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      _userName = authState.user.name.trim().split(' ').first;
+    }
     // Request PIN status after first frame so AuthBloc is available in context
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -43,7 +49,9 @@ class _HomePageState extends State<HomePage> {
           sl<PortfolioBloc>()..add(const PortfolioSummaryRequested()),
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthPinStatusLoaded) {
+          if (state is AuthAuthenticated) {
+            setState(() => _userName = state.user.name.trim().split(' ').first);
+          } else if (state is AuthPinStatusLoaded) {
             setState(() => _hasPinConfigured = state.hasPinConfigured);
           } else if (state is AuthPinSetSuccess) {
             setState(() => _hasPinConfigured = true);
@@ -138,6 +146,7 @@ class _HomePageState extends State<HomePage> {
                       },
                       child: DashboardView(
                         hasPinConfigured: _hasPinConfigured ?? true,
+                        userName: _userName,
                         onHistoryTapped: () {
                           setState(() {
                             _currentIndex = 2;
