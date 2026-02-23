@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// API endpoint constants for the Guardian Invest backend.
 ///
 /// All endpoints are relative to [baseUrl].
@@ -8,6 +10,9 @@ class ApiConstants {
 
   /// Base URL for the backend API.
   static String get baseUrl {
+    if (kDebugMode) {
+      return 'https://localhost:3000/api';
+    }
     return 'https://fintech-session-guard-api.onrender.com/api';
   }
 

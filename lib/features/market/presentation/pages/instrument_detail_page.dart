@@ -159,28 +159,38 @@ class _LoadedBody extends StatelessWidget {
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _PriceHeader(instrument: instrument),
-                const SizedBox(height: 24),
-                _TimeframeChart(
-                  history: history,
-                  selectedRange: selectedRange,
-                  instrumentId: instrument.id,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _PriceHeader(instrument: instrument),
+                    const SizedBox(height: 24),
+                    _TimeframeChart(
+                      history: history,
+                      selectedRange: selectedRange,
+                      instrumentId: instrument.id,
+                    ),
+                    const SizedBox(height: 24),
+                    _StatsRow(instrument: instrument),
+                    const SizedBox(height: 24),
+                    _InstrumentInfoCard(history: history),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _StatsRow(instrument: instrument),
-                const SizedBox(height: 24),
-                _InstrumentInfoCard(history: history),
-              ],
+              ),
             ),
           ),
         ),
-        _ActionBar(
-          instrument: instrument,
-          ownedQuantity: ownedQty,
-          hasPinConfigured: hasPinConfigured,
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: _ActionBar(
+              instrument: instrument,
+              ownedQuantity: ownedQty,
+              hasPinConfigured: hasPinConfigured,
+            ),
+          ),
         ),
       ],
     );
