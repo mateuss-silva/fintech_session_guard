@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/market/domain/entities/instrument_entity.dart';
 import 'package:fintech_session_guard/features/market/presentation/bloc/market_bloc.dart';
@@ -13,9 +14,12 @@ import 'package:fintech_session_guard/core/di/injection.dart';
 class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
   final MarketBloc marketBloc = sl<MarketBloc>();
   final PortfolioBloc portfolioBloc;
+  final bool hasPinConfigured;
 
-  InstrumentSearchDelegate({required this.portfolioBloc})
-    : super(searchFieldLabel: 'Search for assets (e.g. PETR4)');
+  InstrumentSearchDelegate({
+    required this.portfolioBloc,
+    this.hasPinConfigured = true,
+  }) : super(searchFieldLabel: 'Search for assets (e.g. PETR4)');
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -177,7 +181,15 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
                         ],
                       ),
                       onTap: () {
-                        close(context, instrument);
+                        close(context, null);
+                        context.push(
+                          '/instrument/${instrument.id}',
+                          extra: {
+                            'instrument': instrument,
+                            'hasPinConfigured': hasPinConfigured,
+                            'portfolioBloc': portfolioBloc,
+                          },
+                        );
                       },
                     );
                   },
@@ -302,7 +314,15 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
                         ],
                       ),
                       onTap: () {
-                        close(context, instrument);
+                        close(context, null);
+                        context.push(
+                          '/instrument/${instrument.id}',
+                          extra: {
+                            'instrument': instrument,
+                            'hasPinConfigured': hasPinConfigured,
+                            'portfolioBloc': portfolioBloc,
+                          },
+                        );
                       },
                     );
                   },

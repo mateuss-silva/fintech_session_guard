@@ -21,7 +21,9 @@ import '../../features/market/data/datasources/market_remote_data_source.dart';
 import '../../features/market/data/repositories/market_repository_impl.dart';
 import '../../features/market/domain/repositories/market_repository.dart';
 import '../../features/market/domain/usecases/search_instruments_usecase.dart';
+import '../../features/market/domain/usecases/get_instrument_history_usecase.dart';
 import '../../features/market/presentation/bloc/market_bloc.dart';
+import '../../features/market/presentation/bloc/instrument_detail_bloc.dart';
 
 import '../../features/home/data/datasources/asset_price_service.dart';
 import '../../features/home/data/datasources/rx_asset_price_service_factory.dart';
@@ -194,8 +196,16 @@ Future<void> initDependencies() async {
     () => SearchInstrumentsUseCase(sl<MarketRepository>()),
   );
 
+  sl.registerLazySingleton<GetInstrumentHistoryUseCase>(
+    () => GetInstrumentHistoryUseCase(sl<MarketRepository>()),
+  );
+
   sl.registerFactory<MarketBloc>(
     () => MarketBloc(searchInstrumentsUseCase: sl<SearchInstrumentsUseCase>()),
+  );
+
+  sl.registerFactory<InstrumentDetailBloc>(
+    () => InstrumentDetailBloc(getHistory: sl<GetInstrumentHistoryUseCase>()),
   );
 
   // ───────────────────────────────────────────────────────────

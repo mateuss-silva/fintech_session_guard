@@ -34,10 +34,6 @@ class ResponsiveScaffold extends StatelessWidget {
               backgroundColor: AppColors.cardColor,
               selectedIndex: currentIndex,
               onDestinationSelected: (int index) {
-                if (index == 1) {
-                  onSearchTapped?.call();
-                  return;
-                }
                 onIndexChanged?.call(index);
               },
               labelType: NavigationRailLabelType.all,
@@ -109,10 +105,6 @@ class ResponsiveScaffold extends StatelessWidget {
         backgroundColor: AppColors.cardColor,
         currentIndex: currentIndex,
         onTap: (int index) {
-          if (index == 1) {
-            onSearchTapped?.call();
-            return;
-          }
           onIndexChanged?.call(index);
         },
         selectedItemColor: Colors.white,

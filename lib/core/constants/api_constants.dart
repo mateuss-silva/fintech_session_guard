@@ -42,6 +42,7 @@ class ApiConstants {
 
   // ─── Market ────────────────────────────────────────────────────
   static const String marketSearch = '/market/instruments';
+  static String instrumentHistory(String id) => '/instruments/$id/history';
 
   // ─── Trade ────────────────────────────────────────────────────
   static const String tradeBuy = '/trade/buy';
