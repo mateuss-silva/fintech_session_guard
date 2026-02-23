@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'
+    show
+        kIsWeb; // Actually kIsWeb is not needed anymore either if I remove it, but let's just remove the whole line.
 
 /// API endpoint constants for the Guardian Invest backend.
 ///
@@ -9,14 +11,8 @@ class ApiConstants {
   ApiConstants._();
 
   /// Base URL for the backend API.
-  /// Uses 10.0.2.2 for Android Emulator, localhost for others.
   static String get baseUrl {
-    if (kIsWeb) return 'https://localhost:3000/api';
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'https://10.0.2.2:3000/api';
-    }
-    // Windows Desktop often fails to resolve localhost correctly in Flutter, use IPv4 loopback
-    return 'https://127.0.0.1:3000/api';
+    return 'https://fintech-session-guard-api.onrender.com/api';
   }
 
   // ─── Auth ──────────────────────────────────────────────────────
