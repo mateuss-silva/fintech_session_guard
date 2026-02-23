@@ -63,12 +63,6 @@ class _HomePageState extends State<HomePage> {
             },
             actions: [
               IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  context.read<PortfolioBloc>().add(const PortfolioRefreshed());
-                },
-              ),
-              IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () {
                   context.read<AuthBloc>().add(const AuthLogoutRequested());
