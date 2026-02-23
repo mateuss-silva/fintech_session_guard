@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
 import 'package:fintech_session_guard/features/home/domain/entities/portfolio_summary_entity.dart';
+import 'package:fintech_session_guard/features/home/presentation/widgets/portfolio_stat_item.dart';
 import 'package:intl/intl.dart';
 
 class PortfolioSummaryCard extends StatelessWidget {
@@ -78,24 +79,26 @@ class PortfolioSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStat(
-                  context,
-                  'Invested',
-                  currencyFormat.format(summary.totalInvested),
-                  AppColors.textPrimary,
+                PortfolioStatItem(
+                  label: 'Invested',
+                  value: currencyFormat.format(summary.totalInvested),
+                  valueColor: AppColors.textPrimary,
                 ),
-                _buildStat(
-                  context,
-                  'Profit',
-                  currencyFormat.format(summary.totalProfit),
-                  summary.totalProfit >= 0 ? AppColors.profit : AppColors.loss,
+                PortfolioStatItem(
+                  label: 'Profit',
+                  value: currencyFormat.format(summary.totalProfit),
+                  valueColor: summary.totalProfit >= 0
+                      ? AppColors.profit
+                      : AppColors.loss,
                   isProfit: true,
                 ),
-                _buildStat(
-                  context,
-                  'Return',
-                  '${summary.variationPct >= 0 ? '+' : ''}${percentFormat.format(summary.variationPct / 100)}',
-                  summary.variationPct >= 0 ? AppColors.profit : AppColors.loss,
+                PortfolioStatItem(
+                  label: 'Return',
+                  value:
+                      '${summary.variationPct >= 0 ? '+' : ''}${percentFormat.format(summary.variationPct / 100)}',
+                  valueColor: summary.variationPct >= 0
+                      ? AppColors.profit
+                      : AppColors.loss,
                   isProfit: true,
                 ),
               ],
@@ -106,17 +109,17 @@ class PortfolioSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStat(
-                  context,
-                  'Available Cash',
-                  currencyFormat.format(summary.availableForInvestment),
-                  AppColors.textPrimary,
+                PortfolioStatItem(
+                  label: 'Available Cash',
+                  value: currencyFormat.format(summary.availableForInvestment),
+                  valueColor: AppColors.textPrimary,
                 ),
-                _buildStat(
-                  context,
-                  'Market Status',
-                  summary.isMarketOpen ? 'Open' : 'Closed',
-                  summary.isMarketOpen ? AppColors.profit : AppColors.loss,
+                PortfolioStatItem(
+                  label: 'Market Status',
+                  value: summary.isMarketOpen ? 'Open' : 'Closed',
+                  valueColor: summary.isMarketOpen
+                      ? AppColors.profit
+                      : AppColors.loss,
                   isProfit: true,
                 ),
               ],
@@ -178,46 +181,6 @@ class PortfolioSummaryCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStat(
-    BuildContext context,
-    String label,
-    String value,
-    Color valueColor, {
-    bool isProfit = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: isProfit && valueColor != AppColors.textPrimary
-              ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
-              : EdgeInsets.zero,
-          decoration: isProfit && valueColor != AppColors.textPrimary
-              ? BoxDecoration(
-                  color: valueColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                )
-              : null,
-          child: Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: valueColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
