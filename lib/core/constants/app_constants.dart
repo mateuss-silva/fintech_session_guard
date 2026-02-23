@@ -2,7 +2,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'Fintech Session Guard';
+  static const String appName = 'Guardian Invest';
   static const String appVersion = '1.0.0';
 
   /// Session timeout in minutes — must match backend configuration.

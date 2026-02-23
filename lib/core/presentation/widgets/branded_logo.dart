@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
-/// A premium, branded logo for Session Guard.
+/// A premium, branded logo for Guardian Invest.
 /// Uses layered icons and gradients to create a high-fidelity visual identity.
 class BrandedLogo extends StatelessWidget {
   final double size;

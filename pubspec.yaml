@@ -1,5 +1,5 @@
 name: fintech_session_guard
-description: "Fintech Investment App — Session Hijacking Protection (OWASP + NIST)"
+description: "Guardian Invest — Fintech Investment App — Session Hijacking Protection (OWASP + NIST)"
 publish_to: "none"
 version: 1.0.0+1
 

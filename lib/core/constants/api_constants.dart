@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// API endpoint constants for the Fintech Session Guard backend.
+/// API endpoint constants for the Guardian Invest backend.
 ///
 /// All endpoints are relative to [baseUrl].
 /// Security headers (Authorization, X-Device-Id, X-Biometric-Token)

@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
                         const BrandedLogo(size: 80),
                         const SizedBox(height: 16),
                         const Text(
-                          'Session Guard',
+                          'Guardian Invest',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 28,

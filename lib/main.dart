@@ -59,7 +59,7 @@ class SessionGuardApp extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return MaterialApp.router(
-            title: 'Session Guard — Fintech',
+            title: 'Guardian Invest — Fintech',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.darkTheme,
             routerConfig: AppRouter.router(context.read<AuthBloc>()),

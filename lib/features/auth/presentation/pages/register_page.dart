@@ -109,14 +109,19 @@ class _RegisterPageState extends State<RegisterPage> {
               }
             },
             builder: (context, state) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildRegisterForm(context, state),
-                    const SizedBox(height: 24),
-                  ],
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildRegisterForm(context, state),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
