@@ -4,6 +4,8 @@
 
 Guardian Invest is a premium, secure fintech application designed to be a fortress for your finances. This platform allows you to manage your portfolio, trade assets in real-time, and securely deposit or withdraw funds—all protected by advanced session management and biometric verification.
 
+**🚀 Live Demo:** [https://mateuss-silva.github.io/fintech_session_guard](https://mateuss-silva.github.io/fintech_session_guard)
+
 Built with meaningful engineering principles (**Clean Architecture**) and robust state management (**Flutter BLoC**).
 
 ---

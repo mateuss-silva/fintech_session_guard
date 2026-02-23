@@ -1,7 +1,3 @@
-import 'package:flutter/foundation.dart'
-    show
-        kIsWeb; // Actually kIsWeb is not needed anymore either if I remove it, but let's just remove the whole line.
-
 /// API endpoint constants for the Guardian Invest backend.
 ///
 /// All endpoints are relative to [baseUrl].
