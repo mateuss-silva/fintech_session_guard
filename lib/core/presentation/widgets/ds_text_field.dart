@@ -40,7 +40,11 @@ class DSTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           obscureText: isPassword,
-          keyboardType: keyboardType,
+          enableSuggestions: !isPassword,
+          autocorrect: !isPassword,
+          keyboardType: isPassword
+              ? TextInputType.visiblePassword
+              : keyboardType,
           onChanged: onChanged,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(

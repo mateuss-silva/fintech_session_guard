@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 import '../constants/api_constants.dart';
@@ -9,7 +10,10 @@ import 'auth_interceptor.dart';
 class ApiClient {
   late final Dio dio;
   final SecureStorageService _secureStorage;
-  final _logger = Logger(printer: PrettyPrinter(methodCount: 0));
+  final _logger = Logger(
+    printer: PrettyPrinter(methodCount: 0),
+    level: kDebugMode ? Level.debug : Level.off,
+  );
 
   ApiClient({required SecureStorageService secureStorage})
     : _secureStorage = secureStorage {
