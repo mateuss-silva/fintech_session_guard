@@ -92,12 +92,25 @@ class _TransactionHistoryViewState extends State<TransactionHistoryView> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        subtitle: Text(
-                          dateFormat.format(tx.createdAt.toLocal()),
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
-                          ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              dateFormat.format(tx.createdAt.toLocal()),
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                            if (tx.quantity != null)
+                              Text(
+                                'Qty: ${tx.quantity!.toStringAsFixed(4)}',
+                                style: const TextStyle(
+                                  color: AppColors.textTertiary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                          ],
                         ),
                         trailing: Text(
                           '${isPositive ? '+' : '-'} ${currencyFormat.format(tx.amount)}',

@@ -1,5 +1,10 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/trade/data/datasources/trade_remote_data_source.dart';
+import '../../features/trade/data/repositories/trade_repository_impl.dart';
+import '../../features/trade/domain/repositories/trade_repository.dart';
+import '../../features/trade/presentation/bloc/trade_bloc.dart';
+
 import '../network/api_client.dart';
 import '../security/secure_storage_service.dart';
 import '../security/session_monitor.dart';
@@ -181,5 +186,20 @@ Future<void> initDependencies() async {
 
   sl.registerFactory<MarketBloc>(
     () => MarketBloc(searchInstrumentsUseCase: sl<SearchInstrumentsUseCase>()),
+  );
+
+  // ───────────────────────────────────────────────────────────
+  // Feature: Trade
+  // ───────────────────────────────────────────────────────────
+  sl.registerLazySingleton<TradeRemoteDataSource>(
+    () => TradeRemoteDataSourceImpl(sl<ApiClient>()),
+  );
+
+  sl.registerLazySingleton<TradeRepository>(
+    () => TradeRepositoryImpl(remoteDataSource: sl<TradeRemoteDataSource>()),
+  );
+
+  sl.registerFactory<TradeBloc>(
+    () => TradeBloc(tradeRepository: sl<TradeRepository>()),
   );
 }

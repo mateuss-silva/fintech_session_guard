@@ -8,6 +8,7 @@ import 'package:fintech_session_guard/features/home/domain/repositories/portfoli
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
+import 'package:fintech_session_guard/features/trade/presentation/widgets/trade_bottom_sheet.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LiveAssetItem extends StatefulWidget {
@@ -125,123 +126,145 @@ class _LiveAssetItemState extends State<LiveAssetItem>
           _disconnectStream();
         }
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        decoration: BoxDecoration(
-          color: _flashColor ?? AppColors.cardColor.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+      child: GestureDetector(
+        onTap: () {
+          final portfolioBloc = context.read<PortfolioBloc>();
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => BlocProvider.value(
+              value: portfolioBloc,
+              child: TradeBottomSheet(
+                ticker: widget.asset.ticker,
+                assetName: widget.asset.name,
+                currentPrice: _currentUnitPrice,
+              ),
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    widget.asset.ticker.substring(0, 1),
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+          );
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: BoxDecoration(
+            color: _flashColor ?? AppColors.cardColor.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      widget.asset.ticker.substring(0, 1),
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.asset.ticker,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                      ),
+                      Text(
+                        widget.asset.name,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${widget.asset.quantity} • ${currencyFormat.format(_currentUnitPrice)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      widget.asset.ticker,
+                      currencyFormat.format(
+                        widget.asset.quantity * _currentUnitPrice,
+                      ),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    Text(
-                      widget.asset.name,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '${widget.asset.quantity} • ${currencyFormat.format(_currentUnitPrice)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          isPositive
+                              ? Icons.arrow_drop_up_rounded
+                              : Icons.arrow_drop_down_rounded,
+                          color: isPositive ? AppColors.profit : AppColors.loss,
+                          size: 20,
+                        ),
+                        Text(
+                          percentFormat.format(_currentVariation / 100),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: isPositive
+                                    ? AppColors.profit
+                                    : AppColors.loss,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    currencyFormat.format(
-                      widget.asset.quantity * _currentUnitPrice,
-                    ),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: Icon(
+                    widget.isWatched ? Icons.star : Icons.star_border,
+                    color: widget.isWatched
+                        ? Colors.amber
+                        : AppColors.textSecondary,
                   ),
-                  Row(
-                    children: [
-                      Icon(
-                        isPositive
-                            ? Icons.arrow_drop_up_rounded
-                            : Icons.arrow_drop_down_rounded,
-                        color: isPositive ? AppColors.profit : AppColors.loss,
-                        size: 20,
-                      ),
-                      Text(
-                        percentFormat.format(_currentVariation / 100),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isPositive ? AppColors.profit : AppColors.loss,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Icon(
-                  widget.isWatched ? Icons.star : Icons.star_border,
-                  color: widget.isWatched
-                      ? Colors.amber
-                      : AppColors.textSecondary,
+                  onPressed: () {
+                    if (widget.isWatched) {
+                      context.read<PortfolioBloc>().add(
+                        WatchlistRemoved(widget.asset.ticker),
+                      );
+                    } else {
+                      context.read<PortfolioBloc>().add(
+                        WatchlistAdded(widget.asset.ticker),
+                      );
+                    }
+                  },
                 ),
-                onPressed: () {
-                  if (widget.isWatched) {
-                    context.read<PortfolioBloc>().add(
-                      WatchlistRemoved(widget.asset.ticker),
-                    );
-                  } else {
-                    context.read<PortfolioBloc>().add(
-                      WatchlistAdded(widget.asset.ticker),
-                    );
-                  }
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

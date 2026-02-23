@@ -41,6 +41,10 @@ class ApiConstants {
   // ─── Market ────────────────────────────────────────────────────
   static const String marketSearch = '/market/instruments';
 
+  // ─── Trade ────────────────────────────────────────────────────
+  static const String tradeBuy = '/trade/buy';
+  static const String tradeSell = '/trade/sell';
+
   // ─── Transactions ──────────────────────────────────────────────
   static const String transactionsHistory = '/transactions/history';
   static const String previewWithdraw = '/transactions/withdraw/preview';

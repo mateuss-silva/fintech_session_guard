@@ -42,12 +42,6 @@ class WalletDialogs {
         return _ConfettiSuccessDialog(message: message);
       },
     );
-
-    // Auto-close after 3 seconds
-    await Future.delayed(const Duration(seconds: 3));
-    if (context.mounted) {
-      Navigator.of(context).pop();
-    }
   }
 
   static Future<void> _showAmountDialog(
@@ -278,6 +272,12 @@ class _ConfettiSuccessDialogState extends State<_ConfettiSuccessDialog> {
     super.initState();
     _controller = ConfettiController(duration: const Duration(seconds: 2));
     _controller.play();
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   @override

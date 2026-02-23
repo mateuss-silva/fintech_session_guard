@@ -9,6 +9,8 @@ import 'package:fintech_session_guard/features/market/presentation/widgets/instr
 import 'package:fintech_session_guard/features/home/presentation/widgets/transaction_history_view.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/dashboard_view.dart';
 
+import 'package:fintech_session_guard/features/trade/presentation/widgets/trade_bottom_sheet.dart';
+
 import 'package:fintech_session_guard/core/presentation/widgets/responsive_scaffold.dart';
 
 class HomePage extends StatefulWidget {
@@ -36,11 +38,28 @@ class _HomePageState extends State<HomePage> {
                 _currentIndex = index;
               });
             },
-            onSearchTapped: () {
-              showSearch(
+            onSearchTapped: () async {
+              final selected = await showSearch(
                 context: context,
                 delegate: InstrumentSearchDelegate(),
               );
+
+              if (selected != null && context.mounted) {
+                final portfolioBloc = context.read<PortfolioBloc>();
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (bottomSheetContext) => BlocProvider.value(
+                    value: portfolioBloc,
+                    child: TradeBottomSheet(
+                      ticker: selected.ticker,
+                      assetName: selected.name,
+                      currentPrice: selected.currentPrice,
+                    ),
+                  ),
+                );
+              }
             },
             actions: [
               IconButton(

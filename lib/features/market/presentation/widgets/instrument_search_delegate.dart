@@ -228,9 +228,7 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
                     ),
                   ),
                   onTap: () {
-                    // Populate the query field if tapped, or close
-                    query = instrument.ticker;
-                    showResults(context);
+                    close(context, instrument);
                   },
                 );
               },
