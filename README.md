@@ -8,6 +8,21 @@ Built with meaningful engineering principles (**Clean Architecture**) and robust
 
 ---
 
+## 🖼️ Screenshots
+
+<p align="center">
+  <img src="assets/images/home.png" width="300" alt="Home Screen" />
+  <img src="assets/images/graph.png" width="300" alt="Market Graph" />
+  <img src="assets/images/graph-details.png" width="300" alt="Asset Details" />
+</p>
+<p align="center">
+  <img src="assets/images/search.png" width="300" alt="Search" />
+  <img src="assets/images/watchlist.png" width="300" alt="Watchlist" />
+  <img src="assets/images/history.png" width="300" alt="Transaction History" />
+</p>
+
+---
+
 ## 🚀 Features
 
 ### 💸 Premium Fintech Experience
