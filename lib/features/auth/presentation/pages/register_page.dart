@@ -46,7 +46,53 @@ class _RegisterPageState extends State<RegisterPage> {
           child: BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthAuthenticated) {
+                // If it was pushed on top of login, this will pop back.
+                // The main GoRouter redirect will simultaneously handle sending to /home
                 Navigator.of(context).pop();
+              } else if (state is AuthRegistered) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (dialogCtx) => AlertDialog(
+                    backgroundColor: AppTheme.cardColor,
+                    title: const Text(
+                      'Account Created',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    content: Text(
+                      'Your account was created successfully. Would you like to log in now?',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(dialogCtx).pop();
+                          Navigator.of(
+                            context,
+                          ).pop(); // Go back to login screen
+                        },
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(dialogCtx).pop();
+                          context.read<AuthBloc>().add(
+                            AuthLoginRequested(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text,
+                            ),
+                          );
+                        },
+                        child: const Text('Log In Now'),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
             builder: (context, state) {

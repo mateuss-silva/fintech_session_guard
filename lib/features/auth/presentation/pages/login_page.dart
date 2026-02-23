@@ -5,10 +5,10 @@ import '../../../../core/presentation/widgets/branded_logo.dart';
 import '../../../../core/presentation/widgets/ds_button.dart';
 import '../../../../core/presentation/widgets/ds_text_field.dart';
 import '../../../../core/presentation/widgets/ds_feedback_panel.dart';
+import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -82,12 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                         _buildLoginForm(context, state),
                         const SizedBox(height: 24),
                         TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const RegisterPage(),
-                            ),
-                          ),
+                          onPressed: () => context.push('/register'),
                           child: Text(
                             "Don't have an account? Create one",
                             style: TextStyle(
