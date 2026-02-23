@@ -5,12 +5,16 @@ import 'package:fintech_session_guard/features/market/domain/entities/instrument
 import 'package:fintech_session_guard/features/market/presentation/bloc/market_bloc.dart';
 import 'package:fintech_session_guard/features/market/presentation/bloc/market_event.dart';
 import 'package:fintech_session_guard/features/market/presentation/bloc/market_state.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
+import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_state.dart';
 import 'package:fintech_session_guard/core/di/injection.dart';
 
 class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
   final MarketBloc marketBloc = sl<MarketBloc>();
+  final PortfolioBloc portfolioBloc;
 
-  InstrumentSearchDelegate()
+  InstrumentSearchDelegate({required this.portfolioBloc})
     : super(searchFieldLabel: 'Search for assets (e.g. PETR4)');
 
   @override
@@ -86,61 +90,96 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
               );
             }
 
-            return ListView.separated(
-              itemCount: instruments.length,
-              separatorBuilder: (context, index) =>
-                  const Divider(color: AppColors.cardBorder, height: 1),
-              itemBuilder: (context, index) {
-                final instrument = instruments[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.cardColor,
-                    child: Text(
-                      instrument.ticker.substring(0, 1).toUpperCase(),
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+            return BlocBuilder<PortfolioBloc, PortfolioState>(
+              bloc: portfolioBloc,
+              builder: (context, portfolioState) {
+                List<String> watchlist = [];
+                if (portfolioState is PortfolioLoaded) {
+                  watchlist = portfolioState.watchlist;
+                }
+
+                return ListView.separated(
+                  itemCount: instruments.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(color: AppColors.cardBorder, height: 1),
+                  itemBuilder: (context, index) {
+                    final instrument = instruments[index];
+                    final isSaved = watchlist.contains(instrument.ticker);
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.cardColor,
+                        child: Text(
+                          instrument.ticker.substring(0, 1).toUpperCase(),
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  title: Text(
-                    instrument.ticker,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  subtitle: Text(
-                    instrument.name,
-                    style: const TextStyle(color: AppColors.textSecondary),
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '\$ ${instrument.currentPrice.toStringAsFixed(2)}',
+                      title: Text(
+                        instrument.ticker,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      Text(
-                        '${instrument.changePercent >= 0 ? '+' : ''}${instrument.changePercent.toStringAsFixed(2)}%',
-                        style: TextStyle(
-                          color: instrument.changePercent >= 0
-                              ? AppColors.profit
-                              : AppColors.loss,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                      subtitle: Text(
+                        instrument.name,
+                        style: const TextStyle(color: AppColors.textSecondary),
                       ),
-                    ],
-                  ),
-                  onTap: () {
-                    // When tapped, we could close the search and pass back the selected instrument.
-                    // For now, let's just show a simple snackbar or navigate if needed
-                    close(context, instrument);
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '\$ ${instrument.currentPrice.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '${instrument.changePercent >= 0 ? '+' : ''}${instrument.changePercent.toStringAsFixed(2)}%',
+                                style: TextStyle(
+                                  color: instrument.changePercent >= 0
+                                      ? AppColors.profit
+                                      : AppColors.loss,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              isSaved ? Icons.star : Icons.star_border,
+                              color: isSaved
+                                  ? Colors.amber
+                                  : AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              if (isSaved) {
+                                portfolioBloc.add(
+                                  WatchlistRemoved(instrument.ticker),
+                                );
+                              } else {
+                                portfolioBloc.add(
+                                  WatchlistAdded(instrument.ticker),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        close(context, instrument);
+                      },
+                    );
                   },
                 );
               },
@@ -192,43 +231,80 @@ class InstrumentSearchDelegate extends SearchDelegate<InstrumentEntity?> {
               );
             }
 
-            return ListView.separated(
-              itemCount: instruments.length,
-              separatorBuilder: (context, index) =>
-                  const Divider(color: AppColors.cardBorder, height: 1),
-              itemBuilder: (context, index) {
-                final instrument = instruments[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.cardColor,
-                    child: Text(
-                      instrument.ticker.substring(0, 1).toUpperCase(),
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+            return BlocBuilder<PortfolioBloc, PortfolioState>(
+              bloc: portfolioBloc,
+              builder: (context, portfolioState) {
+                List<String> watchlist = [];
+                if (portfolioState is PortfolioLoaded) {
+                  watchlist = portfolioState.watchlist;
+                }
+
+                return ListView.separated(
+                  itemCount: instruments.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(color: AppColors.cardBorder, height: 1),
+                  itemBuilder: (context, index) {
+                    final instrument = instruments[index];
+                    final isSaved = watchlist.contains(instrument.ticker);
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.cardColor,
+                        child: Text(
+                          instrument.ticker.substring(0, 1).toUpperCase(),
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  title: Text(
-                    instrument.ticker,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '${instrument.name} • ${instrument.sector ?? 'N/A'}',
-                    style: const TextStyle(color: AppColors.textSecondary),
-                  ), // Show sector in suggestion
-                  trailing: Text(
-                    '\$ ${instrument.currentPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  onTap: () {
-                    close(context, instrument);
+                      title: Text(
+                        instrument.ticker,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${instrument.name} • ${instrument.sector ?? 'N/A'}',
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '\$ ${instrument.currentPrice.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              isSaved ? Icons.star : Icons.star_border,
+                              color: isSaved
+                                  ? Colors.amber
+                                  : AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              if (isSaved) {
+                                portfolioBloc.add(
+                                  WatchlistRemoved(instrument.ticker),
+                                );
+                              } else {
+                                portfolioBloc.add(
+                                  WatchlistAdded(instrument.ticker),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        close(context, instrument);
+                      },
+                    );
                   },
                 );
               },

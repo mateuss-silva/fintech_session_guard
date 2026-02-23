@@ -18,16 +18,21 @@ class RxPortfolioServiceMobile implements PortfolioStreamService {
   RxPortfolioServiceMobile(this._client);
 
   @override
-  Stream<PortfolioSummaryModel> getPortfolioStream() {
+  Stream<PortfolioSummaryModel> getPortfolioStream({List<String>? watchlist}) {
     return Rx.retry(
-      () => _getStream(),
+      () => _getStream(watchlist),
     ).asBroadcastStream(onCancel: (subscription) => subscription.cancel());
   }
 
-  Stream<PortfolioSummaryModel> _getStream() async* {
+  Stream<PortfolioSummaryModel> _getStream(List<String>? watchlist) async* {
     try {
+      final queryParams = watchlist != null && watchlist.isNotEmpty
+          ? {'watchlist': watchlist.join(',')}
+          : null;
+
       final response = await _client.dio.get<ResponseBody>(
         '/portfolio/stream',
+        queryParameters: queryParams,
         options: Options(
           responseType: ResponseType.stream,
           receiveTimeout: const Duration(days: 1),

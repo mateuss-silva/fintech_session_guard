@@ -32,9 +32,13 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   }
 
   @override
-  Stream<Either<Failure, PortfolioSummaryEntity>> getPortfolioStream() async* {
+  Stream<Either<Failure, PortfolioSummaryEntity>> getPortfolioStream({
+    List<String>? watchlist,
+  }) async* {
     try {
-      await for (final model in portfolioStreamService.getPortfolioStream()) {
+      await for (final model in portfolioStreamService.getPortfolioStream(
+        watchlist: watchlist,
+      )) {
         yield Right(model);
       }
     } on ServerException catch (e) {

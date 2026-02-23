@@ -23,13 +23,13 @@ class RxPortfolioServiceWeb implements PortfolioStreamService {
   RxPortfolioServiceWeb(this._client, this._secureStorage);
 
   @override
-  Stream<PortfolioSummaryModel> getPortfolioStream() {
+  Stream<PortfolioSummaryModel> getPortfolioStream({List<String>? watchlist}) {
     return Rx.retry(
-      () => _getStream(),
+      () => _getStream(watchlist),
     ).asBroadcastStream(onCancel: (subscription) => subscription.cancel());
   }
 
-  Stream<PortfolioSummaryModel> _getStream() async* {
+  Stream<PortfolioSummaryModel> _getStream(List<String>? watchlist) async* {
     final controller = StreamController<PortfolioSummaryModel>();
 
     final token = await _secureStorage.getAccessToken();
@@ -43,7 +43,10 @@ class RxPortfolioServiceWeb implements PortfolioStreamService {
             }.jsify()
             as web.HeadersInit;
 
-    final body = jsonEncode({'token': token}).toJS;
+    final body = jsonEncode({
+      'token': token,
+      if (watchlist != null && watchlist.isNotEmpty) 'watchlist': watchlist,
+    }).toJS;
 
     final requestOptions = web.RequestInit(
       method: 'POST',

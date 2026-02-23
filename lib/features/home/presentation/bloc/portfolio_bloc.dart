@@ -70,7 +70,7 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     );
 
     await _portfolioSubscription?.cancel();
-    _portfolioSubscription = _streamPortfolioUseCase().listen(
+    _portfolioSubscription = _streamPortfolioUseCase(_currentWatchlist).listen(
       (result) => add(PortfolioStreamUpdated(result)),
       onError: (error) => add(
         PortfolioStreamUpdated(Left(ServerFailure(message: error.toString()))),
@@ -110,6 +110,13 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     if (!_currentWatchlist.contains(event.ticker)) {
       _currentWatchlist.add(event.ticker);
     }
+    await _portfolioSubscription?.cancel();
+    _portfolioSubscription = _streamPortfolioUseCase(_currentWatchlist).listen(
+      (result) => add(PortfolioStreamUpdated(result)),
+      onError: (error) => add(
+        PortfolioStreamUpdated(Left(ServerFailure(message: error.toString()))),
+      ),
+    );
   }
 
   Future<void> _onWatchlistRemoved(
@@ -118,6 +125,13 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
   ) async {
     await _removeTickerUseCase(event.ticker);
     _currentWatchlist.remove(event.ticker);
+    await _portfolioSubscription?.cancel();
+    _portfolioSubscription = _streamPortfolioUseCase(_currentWatchlist).listen(
+      (result) => add(PortfolioStreamUpdated(result)),
+      onError: (error) => add(
+        PortfolioStreamUpdated(Left(ServerFailure(message: error.toString()))),
+      ),
+    );
   }
 
   Future<void> _onDepositRequested(

@@ -154,7 +154,12 @@ class DashboardView extends StatelessWidget {
                                     builder: (context, _) {
                                       // Portfolio Tab
                                       if (tabController.index == 0) {
-                                        return state.portfolio.assets.isEmpty
+                                        final ownedAssets = state
+                                            .portfolio
+                                            .assets
+                                            .where((a) => a.quantity > 0)
+                                            .toList();
+                                        return ownedAssets.isEmpty
                                             ? const Padding(
                                                 padding: EdgeInsets.symmetric(
                                                   vertical: 32.0,
@@ -170,7 +175,7 @@ class DashboardView extends StatelessWidget {
                                                 ),
                                               )
                                             : AssetList(
-                                                assets: state.portfolio.assets,
+                                                assets: ownedAssets,
                                                 watchlist: state.watchlist,
                                               );
                                       }
@@ -192,7 +197,8 @@ class DashboardView extends StatelessWidget {
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    'Your watchlist is empty.',
+                                                    'Star instruments from search to add them here.',
+                                                    textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       color: AppColors
                                                           .textSecondary,

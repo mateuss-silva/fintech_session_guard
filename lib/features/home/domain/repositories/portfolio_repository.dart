@@ -7,7 +7,9 @@ import 'package:fintech_session_guard/features/home/domain/entities/withdraw_pre
 
 abstract class PortfolioRepository {
   Future<Either<Failure, PortfolioSummaryEntity>> getPortfolioSummary();
-  Stream<Either<Failure, PortfolioSummaryEntity>> getPortfolioStream();
+  Stream<Either<Failure, PortfolioSummaryEntity>> getPortfolioStream({
+    List<String>? watchlist,
+  });
   Stream<AssetPriceUpdate> getAssetPriceStream(String ticker);
   Future<Either<Failure, void>> depositMoney(double amount);
   Future<Either<Failure, void>> withdrawMoney(double amount);

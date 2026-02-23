@@ -8,7 +8,9 @@ class StreamPortfolioUseCase {
 
   StreamPortfolioUseCase(this._repository);
 
-  Stream<Either<Failure, PortfolioSummaryEntity>> call() {
-    return _repository.getPortfolioStream();
+  Stream<Either<Failure, PortfolioSummaryEntity>> call([
+    List<String>? watchlist,
+  ]) {
+    return _repository.getPortfolioStream(watchlist: watchlist);
   }
 }

@@ -39,9 +39,12 @@ class _HomePageState extends State<HomePage> {
               });
             },
             onSearchTapped: () async {
+              final portfolioBloc = context.read<PortfolioBloc>();
               final selected = await showSearch(
                 context: context,
-                delegate: InstrumentSearchDelegate(),
+                delegate: InstrumentSearchDelegate(
+                  portfolioBloc: portfolioBloc,
+                ),
               );
 
               if (selected != null && context.mounted) {
