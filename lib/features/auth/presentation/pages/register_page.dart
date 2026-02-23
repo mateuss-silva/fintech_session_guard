@@ -66,29 +66,42 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(dialogCtx).pop();
-                          Navigator.of(
-                            context,
-                          ).pop(); // Go back to login screen
-                        },
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(dialogCtx).pop();
-                          context.read<AuthBloc>().add(
-                            AuthLoginRequested(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text,
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(dialogCtx).pop();
+                                context.read<AuthBloc>().add(
+                                  AuthLoginRequested(
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text,
+                                  ),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12.0),
+                                child: Text('Log In Now'),
+                              ),
                             ),
-                          );
-                        },
-                        child: const Text('Log In Now'),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(dialogCtx).pop();
+                                Navigator.of(
+                                  context,
+                                ).pop(); // Go back to login screen
+                              },
+                              child: const Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
