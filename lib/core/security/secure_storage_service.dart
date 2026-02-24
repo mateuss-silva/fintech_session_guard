@@ -17,7 +17,6 @@ class SecureStorageService {
   static const _deviceIdKey = 'device_id';
   static const _userEmailKey = 'user_email';
   static const _userNameKey = 'user_name';
-  static const _privacyVisibleKey = 'privacy_visible';
 
   final FlutterSecureStorage _storage;
 
@@ -41,15 +40,11 @@ class SecureStorageService {
 
   Future<String?> getAccessToken() => _storage.read(key: _accessTokenKey);
 
-  Future<void> deleteAccessToken() => _storage.delete(key: _accessTokenKey);
-
   // ─── Refresh Token ─────────────────────────────────────────────
   Future<void> saveRefreshToken(String token) =>
       _storage.write(key: _refreshTokenKey, value: token);
 
   Future<String?> getRefreshToken() => _storage.read(key: _refreshTokenKey);
-
-  Future<void> deleteRefreshToken() => _storage.delete(key: _refreshTokenKey);
 
   // ─── User Info ─────────────────────────────────────────────────
   Future<void> saveUserId(String id) =>
@@ -72,16 +67,6 @@ class SecureStorageService {
       _storage.write(key: _deviceIdKey, value: id);
 
   Future<String?> getDeviceId() => _storage.read(key: _deviceIdKey);
-
-  // ─── Privacy Setting ───────────────────────────────────────────
-  Future<void> savePrivacyVisible(bool visible) =>
-      _storage.write(key: _privacyVisibleKey, value: visible.toString());
-
-  Future<bool?> getPrivacyVisible() async {
-    final val = await _storage.read(key: _privacyVisibleKey);
-    if (val == null) return null;
-    return val == 'true';
-  }
 
   // ─── Bulk Operations ──────────────────────────────────────────
   Future<void> saveTokens({

@@ -37,8 +37,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         data: {
           'ticker': ticker,
           'quantity': quantity,
-          if (pin != null) 'pin': pin,
-          if (biometricToken != null) 'biometricToken': biometricToken,
+          'pin': ?pin,
+          'biometricToken': ?biometricToken,
         },
       );
 
@@ -77,8 +77,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         data: {
           'ticker': ticker,
           'quantity': quantity,
-          if (pin != null) 'pin': pin,
-          if (biometricToken != null) 'biometricToken': biometricToken,
+          'pin': ?pin,
+          'biometricToken': ?biometricToken,
         },
       );
 

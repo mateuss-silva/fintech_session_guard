@@ -31,8 +31,6 @@ class ApiConstants {
   static const String deviceRegister = '/device/register';
   static const String deviceVerify = '/device/verify';
   static const String deviceList = '/device/list';
-  static const String bioChallenge = '/device/bio/challenge';
-  static const String bioVerify = '/device/bio/verify';
 
   // ─── Portfolio ─────────────────────────────────────────────────
   static const String portfolio = '/portfolio';

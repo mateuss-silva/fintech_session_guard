@@ -11,7 +11,6 @@ class AppColors {
   static const Color cardBorder = Color(0xFF1E3A5F);
 
   static const Color primary = Color(0xFF00D4AA);
-  static const Color primaryDark = Color(0xFF00A88A);
   static const Color secondary = Color(0xFF3B82F6);
   static const Color accent = Color(0xFF8B5CF6);
   static const Color primaryAction = primary;
