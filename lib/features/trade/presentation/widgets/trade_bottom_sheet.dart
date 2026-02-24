@@ -146,7 +146,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
       ),
     );
 
-    if (verified == true && mounted) {
+    if (verified == true && context.mounted) {
       final pin = pinController.text;
       if (state.isBuy) {
         context.read<TradeBloc>().add(
@@ -167,7 +167,7 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
       }
     } else {
       // Cancelled
-      if (mounted) {
+      if (context.mounted) {
         // Reset state or show cancellation
       }
     }
@@ -413,7 +413,7 @@ class _PinRequiredCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF3D2000),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber.withOpacity(0.4)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [

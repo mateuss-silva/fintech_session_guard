@@ -338,8 +338,8 @@ class _TimeframeChart extends StatelessWidget {
                     show: true,
                     gradient: LinearGradient(
                       colors: [
-                        lineColor.withOpacity(0.25),
-                        lineColor.withOpacity(0.0),
+                        lineColor.withValues(alpha: 0.25),
+                        lineColor.withValues(alpha: 0.0),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -523,9 +523,9 @@ class _InstrumentInfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: profileColor.withOpacity(0.15),
+              color: profileColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: profileColor.withOpacity(0.4)),
+              border: Border.all(color: profileColor.withValues(alpha: 0.4)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -667,8 +667,8 @@ class _ChangeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPositive = changePercent >= 0;
-    final bg = (isPositive ? AppColors.profit : AppColors.loss).withOpacity(
-      0.15,
+    final bg = (isPositive ? AppColors.profit : AppColors.loss).withValues(
+      alpha: 0.15,
     );
     final fg = isPositive ? AppColors.profit : AppColors.loss;
     return Container(

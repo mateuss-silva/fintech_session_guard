@@ -81,7 +81,7 @@ class ResponsiveScaffold extends StatelessWidget {
                     backgroundColor: AppColors.background,
                     elevation: 0,
                   ),
-                  if (banner != null) banner!,
+                  ?banner,
                   Expanded(child: body),
                 ],
               ),
@@ -97,7 +97,7 @@ class ResponsiveScaffold extends StatelessWidget {
       appBar: AppBar(title: Text(title), actions: actions),
       body: Column(
         children: [
-          if (banner != null) banner!,
+          ?banner,
           Expanded(child: body),
         ],
       ),

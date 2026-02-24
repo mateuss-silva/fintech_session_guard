@@ -106,7 +106,7 @@ class _PinSuccessDialogState extends State<PinSuccessDialog>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
               side: BorderSide(
-                color: AppColors.primary.withOpacity(0.4),
+                color: AppColors.primary.withValues(alpha: 0.4),
                 width: 1.5,
               ),
             ),
@@ -127,7 +127,7 @@ class _PinSuccessDialogState extends State<PinSuccessDialog>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.4),
+                          color: AppColors.primary.withValues(alpha: 0.4),
                           blurRadius: 20,
                           spreadRadius: 4,
                         ),
@@ -202,7 +202,7 @@ class _CountdownBarState extends State<_CountdownBar>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, __) => ClipRRect(
+      builder: (_, _) => ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: LinearProgressIndicator(
           value: 1 - _controller.value,
