@@ -25,9 +25,9 @@ class TradeBloc extends Bloc<TradeEvent, TradeState> {
 
     result.fold(
       (failure) {
-        if ((failure.message.contains('PIN') ||
-                failure.message.contains('biometric')) &&
-            failure.message != 'Invalid PIN') {
+        final message = failure.message.toLowerCase();
+        if ((message.contains('pin') || message.contains('biometric')) &&
+            message != 'invalid pin') {
           emit(
             TradeAuthRequired(
               ticker: event.ticker,
@@ -63,9 +63,9 @@ class TradeBloc extends Bloc<TradeEvent, TradeState> {
 
     result.fold(
       (failure) {
-        if ((failure.message.contains('PIN') ||
-                failure.message.contains('biometric')) &&
-            failure.message != 'Invalid PIN') {
+        final message = failure.message.toLowerCase();
+        if ((message.contains('pin') || message.contains('biometric')) &&
+            message != 'invalid pin') {
           emit(
             TradeAuthRequired(
               ticker: event.ticker,

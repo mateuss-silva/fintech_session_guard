@@ -124,6 +124,32 @@ class AuthRemoteDataSource {
     }
   }
 
+  /// GET /api/auth/bio/challenge
+  Future<String> getBiometricChallenge() async {
+    try {
+      final response = await _apiClient.dio.get(ApiConstants.bioChallenge);
+      return response.data['challenge'] as String;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  /// POST /api/auth/bio/verify
+  Future<String> verifyBiometric({
+    required String challenge,
+    required String signature,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConstants.bioVerify,
+        data: {'challenge': challenge, 'signature': signature},
+      );
+      return response.data['biometricToken'] as String;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
   Exception _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout) {

@@ -46,4 +46,13 @@ abstract class AuthRepository {
 
   /// Set or update the user's PIN.
   Future<Either<Failure, void>> setPin(String pin);
+
+  /// Get a biometric challenge for verification.
+  Future<Either<Failure, String>> getBiometricChallenge();
+
+  /// Verify biometric verification and return a biometric token.
+  Future<Either<Failure, String>> verifyBiometric({
+    required String challenge,
+    required String signature,
+  });
 }

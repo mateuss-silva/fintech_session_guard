@@ -10,6 +10,8 @@ import 'package:fintech_session_guard/features/trade/presentation/bloc/trade_blo
 import 'package:fintech_session_guard/features/trade/presentation/bloc/trade_event.dart';
 import 'package:fintech_session_guard/features/trade/presentation/bloc/trade_state.dart';
 import 'package:fintech_session_guard/features/home/presentation/widgets/wallet_dialogs.dart';
+import 'package:fintech_session_guard/core/security/biometric_service.dart';
+import 'package:fintech_session_guard/features/auth/domain/repositories/auth_repository.dart';
 
 class TradeBottomSheet extends StatefulWidget {
   final String ticker;
@@ -32,6 +34,7 @@ class TradeBottomSheet extends StatefulWidget {
 class _TradeBottomSheetState extends State<TradeBottomSheet> {
   final TextEditingController _quantityController = TextEditingController();
   double _quantity = 0.0;
+  bool _isAuthenticating = false;
 
   @override
   void initState() {
@@ -64,6 +67,118 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
   }
 
   Future<void> _handleAuthRequired(
+    BuildContext context,
+    TradeAuthRequired state,
+  ) async {
+    print('DEBUG: _handleAuthRequired triggered for ${state.ticker}');
+    if (_isAuthenticating) {
+      print('DEBUG: Already authenticating, skipping.');
+      return;
+    }
+    _isAuthenticating = true;
+
+    try {
+      final biometricService = sl<BiometricService>();
+      final authRepository = sl<AuthRepository>();
+
+      print('DEBUG: Checking bio availability in BottomSheet...');
+      final isBioAvailable = await biometricService.isBiometricAvailable();
+      print('DEBUG: isBioAvailable: $isBioAvailable');
+
+      if (isBioAvailable && context.mounted) {
+        print('DEBUG: Attempting biometric auth...');
+        final success = await _tryBiometricAuth(
+          context,
+          state,
+          authRepository,
+          biometricService,
+        );
+        print('DEBUG: Biometric auth success: $success');
+        if (success) return;
+      }
+
+      // Fallback to PIN if biometrics fail or are unavailable
+      if (context.mounted) {
+        print('DEBUG: Falling back to PIN dialog.');
+        await _showPinDialog(context, state);
+      }
+    } finally {
+      _isAuthenticating = false;
+    }
+  }
+
+  Future<bool> _tryBiometricAuth(
+    BuildContext context,
+    TradeAuthRequired state,
+    AuthRepository authRepository,
+    BiometricService biometricService,
+  ) async {
+    print('DEBUG: _tryBiometricAuth started');
+    // 1. Get challenge
+    print('DEBUG: Fetching biometric challenge...');
+    final result = await authRepository.getBiometricChallenge();
+
+    return await result.fold(
+      (failure) {
+        print('DEBUG: Get challenge failed: ${failure.message}');
+        return false;
+      },
+      (challenge) async {
+        print('DEBUG: Challenge received: $challenge');
+        // 2. Local Auth
+        print('DEBUG: Triggering biometricService.authenticate...');
+        final didAuthenticate = await biometricService.authenticate(
+          reason: 'Authenticate your trade for ${state.ticker}',
+        );
+        print('DEBUG: local didAuthenticate: $didAuthenticate');
+
+        if (!didAuthenticate) return false;
+
+        // 3. Verify on backend (In a real app, 'signature' would be a real cryptographic signature.
+        // For this demo/challenge, we'll send the challenge back or a dummy success string if the backend expects it.)
+        // Reinstating your previous logic where bioVerify was used.
+        print('DEBUG: Verifying biometric on backend...');
+        final verifyResult = await authRepository.verifyBiometric(
+          challenge: challenge,
+          signature: 'local-auth-success-$challenge',
+        );
+
+        return await verifyResult.fold(
+          (failure) {
+            print('DEBUG: Backend bio verification failed: ${failure.message}');
+            return false;
+          },
+          (biometricToken) async {
+            print('DEBUG: Biometric verification success, token received.');
+            if (context.mounted) {
+              final tradeBloc = context.read<TradeBloc>();
+              if (state.isBuy) {
+                tradeBloc.add(
+                  TradeBuyRequested(
+                    ticker: state.ticker,
+                    quantity: state.quantity,
+                    biometricToken: biometricToken,
+                  ),
+                );
+              } else {
+                tradeBloc.add(
+                  TradeSellRequested(
+                    ticker: state.ticker,
+                    quantity: state.quantity,
+                    biometricToken: biometricToken,
+                  ),
+                );
+              }
+              return true;
+            }
+            return false;
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showPinDialog(
     BuildContext context,
     TradeAuthRequired state,
   ) async {
@@ -164,11 +279,6 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
             pin: pin,
           ),
         );
-      }
-    } else {
-      // Cancelled
-      if (context.mounted) {
-        // Reset state or show cancellation
       }
     }
   }

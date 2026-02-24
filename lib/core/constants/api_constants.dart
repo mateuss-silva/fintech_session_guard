@@ -10,9 +10,6 @@ class ApiConstants {
 
   /// Base URL for the backend API.
   static String get baseUrl {
-    if (kDebugMode) {
-      return 'https://localhost:3000/api';
-    }
     return 'https://fintech-session-guard-api.onrender.com/api';
   }
 
@@ -31,6 +28,8 @@ class ApiConstants {
   static const String deviceRegister = '/device/register';
   static const String deviceVerify = '/device/verify';
   static const String deviceList = '/device/list';
+  static const String bioChallenge = '/auth/bio/challenge';
+  static const String bioVerify = '/auth/bio/verify';
 
   // ─── Portfolio ─────────────────────────────────────────────────
   static const String portfolio = '/portfolio';

@@ -196,4 +196,38 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> getBiometricChallenge() async {
+    try {
+      final challenge = await _remoteDataSource.getBiometricChallenge();
+      return Right(challenge);
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> verifyBiometric({
+    required String challenge,
+    required String signature,
+  }) async {
+    try {
+      final token = await _remoteDataSource.verifyBiometric(
+        challenge: challenge,
+        signature: signature,
+      );
+      return Right(token);
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

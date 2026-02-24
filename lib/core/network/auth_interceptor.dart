@@ -53,7 +53,8 @@ class AuthInterceptor extends Interceptor {
         err.requestOptions.path.contains(ApiConstants.register);
 
     if (err.response?.statusCode == 401 && !isAuthEndpoint && !_isRefreshing) {
-      final errorCode = err.response?.data?['error'];
+      final data = err.response?.data;
+      final errorCode = (data is Map) ? data['error'] : null;
 
       if (errorCode == 'TOKEN_REUSE_DETECTED' ||
           errorCode == 'SESSION_EXPIRED') {

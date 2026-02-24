@@ -8,6 +8,8 @@ import '../../features/trade/presentation/bloc/trade_bloc.dart';
 import '../network/api_client.dart';
 import '../security/secure_storage_service.dart';
 import '../security/session_monitor.dart';
+import '../security/biometric_service.dart';
+import 'package:local_auth/local_auth.dart';
 
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -59,6 +61,10 @@ Future<void> initDependencies() async {
   );
 
   sl.registerLazySingleton<SessionMonitor>(() => SessionMonitor());
+
+  sl.registerLazySingleton<BiometricService>(
+    () => BiometricService(auth: LocalAuthentication()),
+  );
 
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSource(sl<ApiClient>()),
