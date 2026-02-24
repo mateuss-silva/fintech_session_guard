@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
@@ -15,8 +16,9 @@ import '../models/session_model.dart';
 /// Tokens are stored in secure storage, never in logs.
 class AuthRemoteDataSource {
   final ApiClient _apiClient;
+  final Logger _logger = Logger();
 
-  const AuthRemoteDataSource(this._apiClient);
+  AuthRemoteDataSource(this._apiClient);
 
   /// POST /api/auth/login
   Future<Map<String, dynamic>> login({
@@ -127,9 +129,17 @@ class AuthRemoteDataSource {
   /// GET /api/auth/bio/challenge
   Future<String> getBiometricChallenge() async {
     try {
+      _logger.i(
+        '🌐 Biometric Flow: Step 1 - Requesting challenge from server...',
+      );
       final response = await _apiClient.dio.get(ApiConstants.bioChallenge);
-      return response.data['challenge'] as String;
+      final challenge = response.data['challenge'] as String;
+      _logger.d(
+        '📥 Biometric Flow: Received challenge from server: $challenge',
+      );
+      return challenge;
     } on DioException catch (e) {
+      _logger.e('❌ Biometric Flow: Failed to get challenge from server.');
       throw _handleDioError(e);
     }
   }
@@ -140,12 +150,22 @@ class AuthRemoteDataSource {
     required String signature,
   }) async {
     try {
+      _logger.i(
+        '🌐 Biometric Flow: Step 2 - Sending verification signature to server...',
+      );
       final response = await _apiClient.dio.post(
         ApiConstants.bioVerify,
         data: {'challenge': challenge, 'signature': signature},
       );
-      return response.data['biometricToken'] as String;
+      final token = response.data['biometricToken'] as String;
+      _logger.i(
+        '✅ Biometric Flow: Server verified signature and returned biometric token.',
+      );
+      return token;
     } on DioException catch (e) {
+      _logger.e(
+        '❌ Biometric Flow: Server failed to verify biometric signature.',
+      );
       throw _handleDioError(e);
     }
   }

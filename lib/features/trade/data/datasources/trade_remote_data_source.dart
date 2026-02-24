@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 import 'package:fintech_session_guard/core/constants/api_constants.dart';
 import 'package:fintech_session_guard/core/error/exceptions.dart';
 import 'package:fintech_session_guard/core/network/api_client.dart';
@@ -21,6 +22,7 @@ abstract class TradeRemoteDataSource {
 
 class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
   final ApiClient _client;
+  final Logger _logger = Logger();
 
   TradeRemoteDataSourceImpl(this._client);
 
@@ -32,6 +34,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
     String? biometricToken,
   }) async {
     try {
+      if (biometricToken != null) {
+        _logger.i(
+          '🌐 Biometric Flow: Step 3 - Executing trade with Biometric Token: $biometricToken',
+        );
+      } else if (pin != null) {
+        _logger.i('🔑 Auth Flow: Executing trade with PIN.');
+      }
+
       final response = await _client.dio.post(
         ApiConstants.tradeBuy,
         data: {
@@ -72,6 +82,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
     String? biometricToken,
   }) async {
     try {
+      if (biometricToken != null) {
+        _logger.i(
+          '🌐 Biometric Flow: Step 3 - Executing trade with Biometric Token: $biometricToken',
+        );
+      } else if (pin != null) {
+        _logger.i('🔑 Auth Flow: Executing trade with PIN.');
+      }
+
       final response = await _client.dio.post(
         ApiConstants.tradeSell,
         data: {

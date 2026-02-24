@@ -17,14 +17,17 @@ class BiometricService {
   /// at least one biometric (fingerprint, face, etc.).
   Future<bool> isBiometricAvailable() async {
     try {
-      print('DEBUG: checking bio availability...');
+      _logger.i(
+        '🔍 Biometric Flow: Checking biometric availability and hardware support...',
+      );
       final bool canCheckBiometrics = await _auth.canCheckBiometrics;
       final bool isDeviceSupported = await _auth.isDeviceSupported();
       final List<BiometricType> available = await _auth
           .getAvailableBiometrics();
-      print('DEBUG: canCheckBiometrics: $canCheckBiometrics');
-      print('DEBUG: isDeviceSupported: $isDeviceSupported');
-      print('DEBUG: availableBiometrics: $available');
+
+      _logger.d(
+        '📊 Biometric Status: canCheck: $canCheckBiometrics, supported: $isDeviceSupported, types: $available',
+      );
 
       return canCheckBiometrics && isDeviceSupported;
     } catch (e) {
@@ -52,7 +55,9 @@ class BiometricService {
     bool biometricOnly = false,
   }) async {
     try {
-      print('DEBUG: Calling _auth.authenticate...');
+      _logger.i(
+        '🤳 Biometric Flow: Starting local authentication handshake...',
+      );
       final bool didAuthenticate = await _auth.authenticate(
         localizedReason: reason,
         options: AuthenticationOptions(
@@ -60,7 +65,13 @@ class BiometricService {
           biometricOnly: biometricOnly,
         ),
       );
-      print('DEBUG: Authentication result: $didAuthenticate');
+      if (didAuthenticate) {
+        _logger.i('✅ Biometric Flow: Local authentication successful.');
+      } else {
+        _logger.w(
+          '⚠️ Biometric Flow: Local authentication failed or cancelled by user.',
+        );
+      }
       return didAuthenticate;
     } catch (e) {
       _logger.e('Error during biometric authentication: $e');
