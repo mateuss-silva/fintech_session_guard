@@ -9,6 +9,7 @@ class AuthInterceptor extends Interceptor {
   final Dio _dio;
   final Logger _logger;
   bool _isRefreshing = false;
+  Future<bool>? _refreshFuture;
 
   AuthInterceptor({
     required SecureStorageService secureStorage,
@@ -50,14 +51,19 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final isAuthEndpoint =
         err.requestOptions.path.contains(ApiConstants.login) ||
-        err.requestOptions.path.contains(ApiConstants.register);
+        err.requestOptions.path.contains(ApiConstants.register) ||
+        err.requestOptions.path.contains(ApiConstants.refresh);
 
-    if (err.response?.statusCode == 401 && !isAuthEndpoint && !_isRefreshing) {
+    if (err.response?.statusCode == 401 && !isAuthEndpoint) {
       final data = err.response?.data;
       final errorCode = (data is Map) ? data['error'] : null;
 
+      // Critical errors that should trigger immediate logout
       if (errorCode == 'TOKEN_REUSE_DETECTED' ||
-          errorCode == 'SESSION_EXPIRED') {
+          errorCode == 'SESSION_EXPIRED' ||
+          errorCode == 'SESSION_INVALID' ||
+          errorCode == 'DEVICE_MISMATCH') {
+        _logger.e('🔐 Security error detected: $errorCode. Clearing session.');
         await _secureStorage.clearAll();
         handler.reject(
           DioException(
@@ -71,7 +77,17 @@ class AuthInterceptor extends Interceptor {
         return;
       }
 
-      final refreshed = await _tryRefreshToken();
+      // Try to refresh token or wait for an ongoing refresh
+      final refreshed = await (_refreshFuture ??= _tryRefreshToken());
+
+      // Cleanup future after completion if it matches
+      if (_refreshFuture != null) {
+        // We don't null it immediately to let other concurrent requests catch it
+        // but we need to ensure the NEXT set of errors triggers a new one.
+        // A simple way is to wait a tiny bit then null it, or use a sync mechanism.
+        // For now, we'll keep it simple: if the future is done, the next error will reset it.
+      }
+
       if (refreshed) {
         try {
           final token = await _secureStorage.getAccessToken();
@@ -79,13 +95,17 @@ class AuthInterceptor extends Interceptor {
           opts.headers['Authorization'] = 'Bearer $token';
 
           final response = await _dio.fetch(opts);
+          _refreshFuture = null; // Success! Next 401 can try again.
           handler.resolve(response);
           return;
         } catch (e) {
+          _refreshFuture = null;
           handler.reject(err);
           return;
         }
       } else {
+        _refreshFuture = null;
+        _logger.w('⚠️ Token refresh failed. Redirecting to login.');
         await _secureStorage.clearAll();
         handler.reject(
           DioException(
@@ -111,6 +131,9 @@ class AuthInterceptor extends Interceptor {
 
       if (refreshToken == null) return false;
 
+      _logger.i('♻️ Attempting to refresh token...');
+
+      // Use a dedicated Dio instance for refresh to avoid interceptor loops
       final refreshDio = Dio(
         BaseOptions(
           baseUrl: ApiConstants.baseUrl,
@@ -130,16 +153,18 @@ class AuthInterceptor extends Interceptor {
           accessToken: data['accessToken'],
           refreshToken: data['refreshToken'],
         );
-        _logger.i('♻️ Token refreshed successfully');
+        _logger.i('✅ Token refreshed successfully');
         return true;
       }
 
       return false;
     } catch (e) {
-      _logger.e('Token refresh failed: $e');
+      _logger.e('❌ Token refresh failed: $e');
       return false;
     } finally {
       _isRefreshing = false;
+      // Note: we don't null _refreshFuture here to avoid race conditions
+      // where requests wait for it. It's handled in onError.
     }
   }
 }
