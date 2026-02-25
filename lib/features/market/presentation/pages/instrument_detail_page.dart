@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../home/presentation/bloc/portfolio_bloc.dart';
+import '../../../home/presentation/bloc/portfolio_event.dart';
 import '../../../home/presentation/bloc/portfolio_state.dart';
 import '../../../market/domain/entities/instrument_entity.dart';
 import '../../../market/domain/entities/instrument_history_entity.dart';
@@ -50,6 +51,21 @@ class _InstrumentDetailView extends StatelessWidget {
     required this.hasPinConfigured,
   });
 
+  bool _isInWatchlist(PortfolioState state, String ticker) {
+    if (state is PortfolioLoaded) {
+      return state.watchlist.contains(ticker);
+    }
+    return false;
+  }
+
+  void _toggleWatchlist(BuildContext context, String ticker, bool isSaved) {
+    if (isSaved) {
+      context.read<PortfolioBloc>().add(WatchlistRemoved(ticker));
+    } else {
+      context.read<PortfolioBloc>().add(WatchlistAdded(ticker));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,6 +85,20 @@ class _InstrumentDetailView extends StatelessWidget {
           ),
         ),
         actions: [
+          BlocBuilder<PortfolioBloc, PortfolioState>(
+            builder: (context, state) {
+              final isSaved = _isInWatchlist(state, instrument.ticker);
+              return IconButton(
+                icon: Icon(
+                  isSaved ? Icons.star : Icons.star_border,
+                  color: isSaved ? Colors.amber : AppColors.textSecondary,
+                ),
+                tooltip: isSaved ? 'Remove from watchlist' : 'Add to watchlist',
+                onPressed: () =>
+                    _toggleWatchlist(context, instrument.ticker, isSaved),
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: _ChangeChip(changePercent: instrument.changePercent),

@@ -209,7 +209,8 @@ class DashboardView extends StatelessWidget {
                                               )
                                             : AssetList(
                                                 assets: ownedAssets,
-                                                watchlist: state.watchlist,
+                                                hasPinConfigured:
+                                                    hasPinConfigured,
                                               );
                                       }
                                       // Watchlist Tab
@@ -230,7 +231,7 @@ class DashboardView extends StatelessWidget {
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    'Star instruments from search to add them here.',
+                                                    'Add instruments from Search or instrument details to your watchlist.',
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       color: AppColors
@@ -241,7 +242,8 @@ class DashboardView extends StatelessWidget {
                                               )
                                             : AssetList(
                                                 assets: watchedAssets,
-                                                watchlist: state.watchlist,
+                                                hasPinConfigured:
+                                                    hasPinConfigured,
                                               );
                                       }
                                     },

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fintech_session_guard/core/di/injection.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
@@ -7,15 +8,18 @@ import 'package:fintech_session_guard/features/home/domain/entities/asset_entity
 import 'package:fintech_session_guard/features/home/domain/repositories/portfolio_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
-import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
 import 'package:fintech_session_guard/features/trade/presentation/widgets/trade_bottom_sheet.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LiveAssetItem extends StatefulWidget {
   final AssetEntity asset;
-  final bool isWatched;
+  final bool hasPinConfigured;
 
-  const LiveAssetItem({super.key, required this.asset, this.isWatched = false});
+  const LiveAssetItem({
+    super.key,
+    required this.asset,
+    this.hasPinConfigured = true,
+  });
 
   @override
   State<LiveAssetItem> createState() => _LiveAssetItemState();
@@ -104,6 +108,19 @@ class _LiveAssetItemState extends State<LiveAssetItem>
           : AppColors.loss.withValues(alpha: 0.3);
     });
     _controller?.forward();
+  }
+
+  void _navigateToDetails(BuildContext context) {
+    final instrument = widget.asset.toInstrumentEntity();
+    final portfolioBloc = context.read<PortfolioBloc>();
+    context.push(
+      '/instrument/${instrument.id}',
+      extra: {
+        'instrument': instrument,
+        'hasPinConfigured': widget.hasPinConfigured,
+        'portfolioBloc': portfolioBloc,
+      },
+    );
   }
 
   @override
@@ -245,23 +262,12 @@ class _LiveAssetItemState extends State<LiveAssetItem>
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(
-                    widget.isWatched ? Icons.star : Icons.star_border,
-                    color: widget.isWatched
-                        ? Colors.amber
-                        : AppColors.textSecondary,
+                  icon: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textSecondary,
                   ),
-                  onPressed: () {
-                    if (widget.isWatched) {
-                      context.read<PortfolioBloc>().add(
-                        WatchlistRemoved(widget.asset.ticker),
-                      );
-                    } else {
-                      context.read<PortfolioBloc>().add(
-                        WatchlistAdded(widget.asset.ticker),
-                      );
-                    }
-                  },
+                  tooltip: 'View details',
+                  onPressed: () => _navigateToDetails(context),
                 ),
               ],
             ),

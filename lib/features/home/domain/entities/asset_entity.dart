@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../market/domain/entities/instrument_entity.dart';
+
 class AssetEntity extends Equatable {
   final String id;
   final String instrumentId;
@@ -30,6 +32,23 @@ class AssetEntity extends Equatable {
     required this.change,
     required this.changePercent,
   });
+
+  /// Maps this portfolio asset to an [InstrumentEntity] for navigation.
+  InstrumentEntity toInstrumentEntity() {
+    return InstrumentEntity(
+      id: instrumentId,
+      ticker: ticker,
+      name: name,
+      type: type,
+      currentPrice: currentPrice,
+      open: currentPrice,
+      high: currentPrice,
+      low: currentPrice,
+      change: change,
+      changePercent: changePercent,
+      timestamp: DateTime.now().toIso8601String(),
+    );
+  }
 
   @override
   List<Object?> get props => [
