@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fintech_session_guard/core/theme/app_colors.dart';
+import 'package:fintech_session_guard/core/security/transaction_auth_helper.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_bloc.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_event.dart';
 import 'package:fintech_session_guard/features/home/presentation/bloc/portfolio_state.dart';
@@ -138,10 +139,32 @@ class DashboardView extends StatelessWidget {
                             }
                             WalletDialogs.showWithdrawDialog(
                               context,
-                              onConfirm: (amount) {
-                                context.read<PortfolioBloc>().add(
-                                  WalletWithdrawRequested(amount),
-                                );
+                              onConfirm: (amount) async {
+                                final authenticated =
+                                    await TransactionAuthHelper.authenticate(
+                                      context,
+                                      reason:
+                                          'Authenticate to withdraw \$$amount',
+                                    );
+                                if (!authenticated) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Authentication failed. Withdraw cancelled.',
+                                        ),
+                                        backgroundColor: AppColors.loss,
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  }
+                                  return;
+                                }
+                                if (context.mounted) {
+                                  context.read<PortfolioBloc>().add(
+                                    WalletWithdrawRequested(amount),
+                                  );
+                                }
                               },
                             );
                           },
