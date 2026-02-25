@@ -6,11 +6,15 @@ import '../../theme/app_colors.dart';
 /// Reusable PIN authentication dialog.
 ///
 /// Shows a dialog asking the user to enter their PIN and verifies it
-/// against the backend. Returns `true` if verified, `false` if cancelled.
+/// against the backend. Returns the verified PIN string, or `null`
+/// if cancelled.
 class PinAuthDialog {
   PinAuthDialog._();
 
-  static Future<bool> show(
+  /// Shows the PIN dialog and verifies the entered PIN.
+  ///
+  /// Returns the verified PIN [String] on success, or `null` if cancelled.
+  static Future<String?> show(
     BuildContext context, {
     required String reason,
     required AuthRepository authRepository,
@@ -18,7 +22,7 @@ class PinAuthDialog {
     final pinController = TextEditingController();
     String? errorText;
 
-    final verified = await showDialog<bool>(
+    final verifiedPin = await showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => StatefulBuilder(
@@ -93,7 +97,7 @@ class PinAuthDialog {
                       final result = await authRepository.verifyPin(pin);
                       result.fold((failure) {
                         setDialogState(() => errorText = failure.message);
-                      }, (_) => Navigator.of(ctx).pop(true));
+                      }, (_) => Navigator.of(ctx).pop(pin));
                     },
                     child: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12.0),
@@ -105,7 +109,7 @@ class PinAuthDialog {
                   ),
                   const SizedBox(height: 8),
                   TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(false),
+                    onPressed: () => Navigator.of(ctx).pop(null),
                     child: const Text(
                       'Cancel',
                       style: TextStyle(color: AppColors.textSecondary),
@@ -120,6 +124,6 @@ class PinAuthDialog {
     );
 
     pinController.dispose();
-    return verified == true;
+    return verifiedPin;
   }
 }

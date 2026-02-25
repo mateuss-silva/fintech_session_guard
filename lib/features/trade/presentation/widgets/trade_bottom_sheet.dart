@@ -73,19 +73,20 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
     _isAuthenticating = true;
 
     try {
-      final authenticated = await TransactionAuthHelper.authenticate(
+      final authResult = await TransactionAuthHelper.authenticate(
         context,
         reason: 'Authenticate your trade for ${state.ticker}',
       );
 
-      if (authenticated && context.mounted) {
+      if (authResult.isAuthenticated && context.mounted) {
         final tradeBloc = context.read<TradeBloc>();
         if (state.isBuy) {
           tradeBloc.add(
             TradeBuyRequested(
               ticker: state.ticker,
               quantity: state.quantity,
-              pin: 'auth-verified',
+              pin: authResult.pin,
+              biometricToken: authResult.biometricToken,
             ),
           );
         } else {
@@ -93,7 +94,8 @@ class _TradeBottomSheetState extends State<TradeBottomSheet> {
             TradeSellRequested(
               ticker: state.ticker,
               quantity: state.quantity,
-              pin: 'auth-verified',
+              pin: authResult.pin,
+              biometricToken: authResult.biometricToken,
             ),
           );
         }

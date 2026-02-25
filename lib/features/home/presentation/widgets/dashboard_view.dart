@@ -140,13 +140,13 @@ class DashboardView extends StatelessWidget {
                             WalletDialogs.showWithdrawDialog(
                               context,
                               onConfirm: (amount) async {
-                                final authenticated =
+                                final authResult =
                                     await TransactionAuthHelper.authenticate(
                                       context,
                                       reason:
                                           'Authenticate to withdraw \$$amount',
                                     );
-                                if (!authenticated) {
+                                if (!authResult.isAuthenticated) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
