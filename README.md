@@ -42,7 +42,7 @@ Built with meaningful engineering principles (**Clean Architecture**) and robust
 
 ## 🏗️ State Management
 
-We use **Flutter BLoC** (Business Logic Component) alongside **Provider** to keep our code clean, testable, and predictable.
+**Flutter BLoC** (Business Logic Component) alongside **Provider** to keep our code clean, testable, and predictable.
 
 - **Events & States**: Every action (e.g., "User tapped Buy") is an `Event`. The BLoC processes it and emits a new `State` (e.g., "Loading", "Success", "AuthRequired").
 - **Reactive Streams**: For real-time data like asset prices, we employ `Stream`s and RxDart principles to push live updates from the backend WebSocket/SSE directly to the UI layer without blocking the main thread.
@@ -67,7 +67,7 @@ The app strongly adheres to **Clean Architecture** principles to ensure absolute
 
 ## 📦 Tech Stack & Relevant Packages
 
-We carefully selected industry-standard packages for maximum performance:
+Industry-standard packages for maximum performance:
 
 - **Core Framework**: Flutter 3.10+
 - **Backend API**: Node.js with Fastify (for HTTP/2 speed and efficient routing)
@@ -131,6 +131,3 @@ For testing and demonstration purposes, you can use the following account:
 
 - **Email**: `demo@fintech.com`
 - **Password**: `Demo@2024!`
-
-> [!NOTE]
-> This is a pre-configured environment. In a production scenario, always use your own encrypted credentials.
